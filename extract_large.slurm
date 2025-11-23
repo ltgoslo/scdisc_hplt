@@ -1,13 +1,11 @@
 #!/bin/bash
 #SBATCH --job-name=lchange
 #SBATCH --account=project_465002310
-#SBATCH --partition=small
+#SBATCH --partition=standard
 #SBATCH --time=23:00:00
 #SBATCH --nodes=1
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=32
-#SBATCH --mem=32G
 
+# Extraction for really large languages
 
 EBU_USER_PREFIX=/projappl/project_465001925/software/
 
@@ -15,9 +13,12 @@ module --quiet purge
 module load LUMI
 module load PyTorch/2.6.0-rocm-6.2.4-python-3.12-singularity-20250404
 
+# This is to speed up sorting:
+export LC_ALL=C
+
 LANG=${1}  # Path to language in the catalogue
 FIELD=${2} # What field to extract (ts, crawl_id, etc)
-N=24 # Number of files processed in parallel
+N=128 # Number of files processed in parallel
 
 mkdir -p ${LANG}
 
@@ -50,9 +51,9 @@ cat ${LANG}/${FIELD}_*.zst > ${LANG}/${FIELD}.zst
 echo "Sorting..."
 
 if [ "$FIELD" == ts ]; then
-  time -p zstdcat ${LANG}/${FIELD}.zst | cut -d '-' -f 1 | sort | uniq -c | sort -nr > ${LANG}/${FIELD}_sorted.txt
+	time -p zstdcat ${LANG}/${FIELD}.zst | cut -d '-' -f 1 | sort -T /flash/project_465002310/ --parallel=32 | uniq -c | sort -T /flash/project_465002310/ --parallel=32 -nr > ${LANG}/${FIELD}_sorted.txt
 else
-  time -p zstdcat ${LANG}/${FIELD}.zst | sort | uniq -c | sort -nr > ${LANG}/${FIELD}_sorted.txt
+      	time -p zstdcat ${LANG}/${FIELD}.zst | sort -T /flash/project_465002310/ --parallel=32 | uniq -c | sort -T /flash/project_465002310/ --parallel=32 -nr > ${LANG}/${FIELD}_sorted.txt
 fi
 
 singularity exec $SIF python3 dia_distribution.py --data ${LANG}/${FIELD}_sorted.txt --plot ${LANG}/${FIELD}.png
