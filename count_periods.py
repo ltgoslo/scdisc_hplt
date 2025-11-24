@@ -43,7 +43,7 @@ if __name__ == "__main__":
                 logger.info(entry.name)
                 counts[counter] = {}
                 counts[counter]["Language"] = entry.name
-                for line in open(f"{entry.name}/ts_sorted.txt"):
+                for line in open(f"{args.data}/{entry.name}/ts_sorted.txt"):
                     instance = line.strip()
                     number, year = instance.split()
                     counts[counter][year] = int(number)
