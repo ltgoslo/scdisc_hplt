@@ -30,7 +30,7 @@ if __name__ == "__main__":
         "-t",
         type=int,
         help="How many documents we want per period?",
-        default=1000000,
+        default=500000,
     )
     args = parser.parse_args()
 
@@ -73,3 +73,9 @@ if __name__ == "__main__":
     )
     print(missing)
     logger.info(f"{len(missing)} total problematic languages")
+
+    valid_out = "languages2process.tsv"
+    valid_langs = df_periods[~df_periods.Language.isin(missing.Language)].sort_values("Language")
+    valid_langs.to_csv(valid_out, sep="\t", index=False)
+    logger.info(f"Languages to process saved to {valid_out}")
+
