@@ -1,9 +1,10 @@
 #!/bin/bash
 #SBATCH --job-name=lchange
 #SBATCH --account=nn10029k
-#SBATCH --time=8:00:00
+#SBATCH --time=12:00:00
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=24
+#SBATCH --cpus-per-task=8
+#SBATCH --mem-per-cpu=1G
 
 # Extracts documents crawled in a specific time period
 # Saves them in a single jsonl.zst file
@@ -11,21 +12,23 @@
 LANG=${1}  # Language
 PERIOD0=${2} # The first year for extraction
 PERIOD1=${3} # The last year for extraction
-N=16 # Number of files processed in parallel
+DOCS=${4} # How many documents to sample (1000000 or 500000)
+N=8 # Number of files processed in parallel
 
-mkdir -p ${LANG}
+mkdir -p ${SCRATCH}/${LANG}
+mkdir -p diachronic/${LANG}
 
 echo ${LANG}
 echo ${PERIOD0}
 echo ${PERIOD1}
+echo ${DOCS}
 echo ${N}
 
-
-for el in /cluster/projects/nn10029k/HPLT3/${LANG}/*.jsonl.zst
+for el in /nird/datalake/NS8112K/public/three/sorted/${LANG}/*.jsonl.zst
 do
     (
     echo ${el}
-    zstdcat ${el} | jq -c --arg s ${PERIOD0} --arg e ${PERIOD1} 'select(.ts | . >= $s and . <= $e + "z") | {id: .id, ts: .ts, text: .text, doc_scores: .doc_scores}' | zstd > ${LANG}/${PERIOD0}_${PERIOD1}_$(basename ${el}).jsonl.zst
+    zstdcat ${el} | jq -c --arg s ${PERIOD0} --arg e ${PERIOD1} 'select(.ts | . >= $s and . <= $e + "z") | {id: .id, ts: .ts, text: .text, doc_scores: .doc_scores}' | zstd > ${SCRATCH}/${LANG}/${PERIOD0}_${PERIOD1}_$(basename ${el}).jsonl.zst
     sleep $(( (RANDOM % 3) + 1))
     ) &
     # Allow to execute up to $N jobs in parallel
@@ -40,8 +43,11 @@ done
 # (all need to be finished)
 wait
 
-cat ${LANG}/${PERIOD0}_${PERIOD1}_*.zst > ${LANG}/${PERIOD0}_${PERIOD1}.jsonl.zst
+echo "Concatenating..."
+cat ${SCRATCH}/${LANG}/${PERIOD0}_${PERIOD1}_*.zst > ${SCRATCH}/${LANG}/${PERIOD0}_${PERIOD1}.jsonl.zst
+rm ${SCRATCH}/${LANG}/${PERIOD0}_${PERIOD1}_*.zst
 
-rm ${LANG}/${PERIOD0}_${PERIOD1}_*.zst
+echo "Sampling..."
+zstdcat ${SCRATCH}/${LANG}/${PERIOD0}_${PERIOD1}.jsonl.zst | shuf -n ${DOCS} | zstd > diachronic/${LANG}/${PERIOD0}_${PERIOD1}.jsonl.zst
 
 echo "All done"

@@ -1,4 +1,0 @@
-cmn_Hans
-deu_Latn
-fra_Latn
-spa_Latn
