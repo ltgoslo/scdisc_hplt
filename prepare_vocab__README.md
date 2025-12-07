@@ -2,7 +2,9 @@
 
 To set up the environment and install required packages run
 
-`prepare_vocab__setup.sh`
+```
+prepare_vocab__setup.sh
+```
 
 Then to prepare vocabular for language {language_code} run
 
