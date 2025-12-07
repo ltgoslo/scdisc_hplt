@@ -15,7 +15,9 @@ PERIOD1=${3} # The last year for extraction
 DOCS=${4} # How many documents to sample (1000000 or 500000)
 N=8 # Number of files processed in parallel
 
-mkdir -p ${SCRATCH}/${LANG}
+# For smaller languages, one can use local ${SCRATCH} of the compute node
+# (max 3.5T)
+mkdir -p /cluster/work/projects/nn9851k/tmp/${LANG}
 mkdir -p diachronic/${LANG}
 
 echo ${LANG}
@@ -28,7 +30,7 @@ for el in /nird/datalake/NS8112K/public/three/sorted/${LANG}/*.jsonl.zst
 do
     (
     echo ${el}
-    zstdcat ${el} | jq -c --arg s ${PERIOD0} --arg e ${PERIOD1} 'select(.ts | . >= $s and . <= $e + "z") | {id: .id, ts: .ts, text: .text, doc_scores: .doc_scores}' | zstd > ${SCRATCH}/${LANG}/${PERIOD0}_${PERIOD1}_$(basename ${el}).jsonl.zst
+    zstdcat ${el} | jq -c --arg s ${PERIOD0} --arg e ${PERIOD1} 'select(.ts | . >= $s and . <= $e + "z") | {id: .id, ts: .ts, text: .text, doc_scores: .doc_scores}' | zstd > /cluster/work/projects/nn9851k/tmp/${LANG}/${PERIOD0}_${PERIOD1}_$(basename ${el}).jsonl.zst
     sleep $(( (RANDOM % 3) + 1))
     ) &
     # Allow to execute up to $N jobs in parallel
@@ -43,11 +45,28 @@ done
 # (all need to be finished)
 wait
 
-echo "Concatenating..."
-cat ${SCRATCH}/${LANG}/${PERIOD0}_${PERIOD1}_*.zst > ${SCRATCH}/${LANG}/${PERIOD0}_${PERIOD1}.jsonl.zst
-rm ${SCRATCH}/${LANG}/${PERIOD0}_${PERIOD1}_*.zst
-
 echo "Sampling..."
-zstdcat ${SCRATCH}/${LANG}/${PERIOD0}_${PERIOD1}.jsonl.zst | shuf -n ${DOCS} | zstd > diachronic/${LANG}/${PERIOD0}_${PERIOD1}.jsonl.zst
+
+# This is for really large languages like English, Russian or Chinese:
+
+for el in /cluster/work/projects/nn9851k/tmp/${LANG}/${PERIOD0}_${PERIOD1}_*.jsonl.zst
+do
+    (
+    zstdcat ${el} | shuf -n 10000 | zstd > /cluster/work/projects/nn9851k/tmp/${LANG}/sampled_${PERIOD0}_${PERIOD1}_$(basename ${el})
+    sleep $(( (RANDOM % 3) + 1))
+    ) &
+    if [[ $(jobs -r -p | wc -l) -ge $N ]]; then
+        wait -n
+    fi
+done
+wait
+
+zstdcat /cluster/work/projects/nn9851k/tmp/${LANG}/sampled_${PERIOD0}_${PERIOD1}_*.zst | shuf -n ${DOCS} | zstd > diachronic/${LANG}/${PERIOD0}_${PERIOD1}.jsonl.zst
+
+# This is for lesser languages:
+
+# zstdcat /cluster/work/projects/nn9851k/tmp/${LANG}/${PERIOD0}_${PERIOD1}_*.zst | shuf -n ${DOCS} | zstd > diachronic/${LANG}/${PERIOD0}_${PERIOD1}.jsonl.zst
+
+rm /cluster/work/projects/nn9851k/tmp/${LANG}/${PERIOD0}_${PERIOD1}_*.zst
 
 echo "All done"
