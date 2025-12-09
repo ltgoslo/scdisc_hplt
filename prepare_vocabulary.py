@@ -66,10 +66,14 @@ def main():
 					  type=str,
 					  default='NOUN|VERB|ADJ',
 					  help='Parts-of-speech to keep in the vocabulary, separated by "|": default=%default')
-	parser.add_option('--word-freq-threshold',
+	parser.add_option('--inter-period-min-freq',
 					  type=int,
-					  default=2,
-					  help='The minimum number of times the token should appear as a full word: default=%default')
+					  default=10,
+					  help='The minimum number of times the token should appear as a full word across periods: default=%default')
+	parser.add_option('--intra-period-min-freq',
+					  type=int,
+					  default=3,
+					  help='The minimum number of times the token should appear as a full word within each period: default=%default')
 	# parser.add_option('--verbose',
 				# 	  action='store_true',
 				# 	  help='Whether to print out more detailed info: default=%default')
@@ -80,7 +84,8 @@ def main():
 	data_dir = options.data_dir
 	pos_tagger_resources_dir = options.pos_tagger_resources_dir
 	pos_to_keep = options.pos_to_keep.split('|')
-	word_freq_threshold = options.word_freq_threshold
+	inter_period_min_freq = options.inter_period_min_freq
+	intra_period_min_freq = options.intra_period_min_freq
 
 	periods = ['2011_2015', '2020_2021', '2024_2025']
 	infile = os.path.join(data_dir, language, '{}.jsonl.zst')
@@ -110,7 +115,8 @@ def main():
 
 	# Do a word-splitting pass through the data
 	full_word_frequencies = {}
-	for period in periods:
+	for i in range(len(periods)):
+		period = periods[i]
 		with open(infile.format(period), 'rb') as f:
 			# open the data file
 			decompressor = zstd.ZstdDecompressor()
@@ -121,8 +127,8 @@ def main():
 				for word in word_splitter(json.loads(line)['text']):
 					word_lower = word.lower()
 					if word_lower not in full_word_frequencies:
-						full_word_frequencies[word_lower] = 0
-					full_word_frequencies[word_lower] += 1
+						full_word_frequencies[word_lower] = [0, 0, 0]
+					full_word_frequencies[word_lower][i] += 1
 
 	with open(os.path.join(data_dir, language, 'full_word_frequencies.json'), 'w') as f:
 		json.dump(full_word_frequencies, f)
@@ -162,7 +168,11 @@ def main():
 	# Filter T5 vocabulary to obtain Target Words
 	target_words = []
 	for token in pos_tagged_T5_vocabulary:
-		if pos_tagged_T5_vocabulary[token]['upos'] in pos_to_keep and full_word_frequencies.get(token.lower(), 0) > word_freq_threshold:
+		frequencies = full_word_frequencies.get(token.lower())
+		if pos_tagged_T5_vocabulary[token]['upos'] in pos_to_keep \
+		and frequencies is not None \
+		and sum(frequencies) >= inter_period_min_freq \
+		and min(frequencies) >= intra_period_min_freq:
 			target_words.append(token)
 
 	target_words = sorted(target_words)
