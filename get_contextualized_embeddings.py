@@ -194,7 +194,7 @@ def main():
 
 	# save frequency info
 	with open(os.path.join(data_dir, langauge, '{}__frequencies_info.json'.format(period)), 'w') as f:
-		json.dump(frequencies_by_token_id)
+		json.dump(frequencies_by_token_id, f)
 
 
 if __name__ == '__main__':
