@@ -79,8 +79,8 @@ def main():
 			paragraphs_batch = []
 			paragraph_ids_batch = []
 			for line in tqdm(stream, total=10**6, mininterval=60):
-				if total_paragraph_count > 300:
-					break
+				# if total_paragraph_count > 300:
+				# 	break
 				total_doc_count += 1
 				doc_dct = json.loads(line)
 				paragraphs = doc_dct['text'].split('\n')
