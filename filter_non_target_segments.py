@@ -53,10 +53,10 @@ def main():
 	# Load target words
 	with open(os.path.join(data_dir, language, 'target_words.json')) as f:
 		target_words = json.load(f)
-	with open(os.path.join(data_dir, language, 'pos_tagged_T5_vocabulary.json')) as f:
-		pos_tagged_T5_vocabulary = json.load(f)
-	global target_word_token_ids   
-	target_word_token_ids = [pos_tagged_T5_vocabulary[word]['id'] for word in target_words]
+	# with open(os.path.join(data_dir, language, 'pos_tagged_T5_vocabulary.json')) as f:
+	# 	pos_tagged_T5_vocabulary = json.load(f)
+	# global target_word_token_ids   
+	# target_word_token_ids = [pos_tagged_T5_vocabulary[word]['id'] for word in target_words]
 
 	infile = os.path.join(data_dir, language, '{}.jsonl.zst'.format(period))
 	outfile = os.path.join(data_dir, language, '{}__filtered_segments.jsonl.zst'.format(period))
@@ -67,7 +67,7 @@ def main():
 	tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 	global frequencies_by_token_id, filtered_paragraph_count
-	frequencies_by_token_id = {token_id: 0 for token_id in target_word_token_ids}
+	frequencies_by_token_id = {target_words[word]: 0 for word in target_words}
 	total_doc_count, total_paragraph_count, filtered_paragraph_count = 0, 0, 0
 
 	with open(infile, 'rb') as in_f:
