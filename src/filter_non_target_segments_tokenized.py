@@ -53,7 +53,7 @@ def main():
     data_dir = options.data_dir
 
     # Load target words
-    with open(os.path.join("../languages", language, "target_words.json")) as f:
+    with open(os.path.join("languages", language, "target_words.json")) as f:
         target_words = json.load(f)
 
     target_word_ids = set([target_words[word] for word in target_words])
@@ -108,7 +108,7 @@ def main():
                                         truncation_start = length - max_len
                                         truncation_end = length
                                     else:
-                                        context = trunc_budget / 2
+                                        context = int(trunc_budget / 2)
                                         truncation_start = first - context
                                         truncation_end = last + context
                             trunc_segm_count += 1
