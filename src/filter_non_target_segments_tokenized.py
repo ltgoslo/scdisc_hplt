@@ -134,7 +134,7 @@ def main():
 
     with open(
         os.path.join(
-            "/cluster/projects/nn9851k/corpora/diachronic/",
+            data_dir,
             language,
             f"{period}__segment_filtering_info.json",
         ),
