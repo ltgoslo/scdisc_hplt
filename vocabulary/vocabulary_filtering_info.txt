@@ -1,0 +1,246 @@
+LANGUAGE: als_Latn
+  0%|          | 0/32559 [00:00<?, ?it/s]100%|██████████| 32559/32559 [00:00<00:00, 432114.19it/s]
+New vocab size: 21594
+# of words that were filtered out using full word frequencies 4047
+# of filtered-out single-character words: 5
+------------------------------------------------------
+LANGUAGE: arb_Arab
+  0%|          | 0/31433 [00:00<?, ?it/s]100%|██████████| 31433/31433 [00:00<00:00, 445197.86it/s]
+New vocab size: 17361
+# of words that were filtered out using full word frequencies 1298
+# of filtered-out single-character words: 1
+------------------------------------------------------
+LANGUAGE: bos_Latn
+  0%|          | 0/32266 [00:00<?, ?it/s]100%|██████████| 32266/32266 [00:00<00:00, 479978.91it/s]
+New vocab size: 18109
+# of words that were filtered out using full word frequencies 2360
+# of filtered-out single-character words: 22
+------------------------------------------------------
+LANGUAGE: bul_Cyrl
+  0%|          | 0/32503 [00:00<?, ?it/s]100%|██████████| 32503/32503 [00:00<00:00, 365137.74it/s]
+New vocab size: 19805
+# of words that were filtered out using full word frequencies 4978
+# of filtered-out single-character words: 7
+------------------------------------------------------
+LANGUAGE: cat_Latn
+  0%|          | 0/31846 [00:00<?, ?it/s]100%|██████████| 31846/31846 [00:00<00:00, 472153.68it/s]
+New vocab size: 19823
+# of words that were filtered out using full word frequencies 1964
+# of filtered-out single-character words: 33
+------------------------------------------------------
+LANGUAGE: ces_Latn
+  0%|          | 0/32490 [00:00<?, ?it/s]100%|██████████| 32490/32490 [00:00<00:00, 422716.90it/s]
+New vocab size: 20247
+# of words that were filtered out using full word frequencies 5197
+# of filtered-out single-character words: 70
+------------------------------------------------------
+LANGUAGE: cmn_Hans
+  0%|          | 0/25612 [00:00<?, ?it/s]100%|██████████| 25612/25612 [00:00<00:00, 475157.31it/s]
+New vocab size: 16695
+# of words that were filtered out using full word frequencies 204
+# of filtered-out single-character words: 0
+------------------------------------------------------
+LANGUAGE: dan_Latn
+  0%|          | 0/32524 [00:00<?, ?it/s]100%|██████████| 32524/32524 [00:00<00:00, 450808.47it/s]
+New vocab size: 20524
+# of words that were filtered out using full word frequencies 2888
+# of filtered-out single-character words: 13
+------------------------------------------------------
+LANGUAGE: deu_Latn
+  0%|          | 0/32469 [00:00<?, ?it/s]100%|██████████| 32469/32469 [00:00<00:00, 482066.88it/s]
+New vocab size: 18157
+# of words that were filtered out using full word frequencies 2712
+# of filtered-out single-character words: 3
+------------------------------------------------------
+LANGUAGE: ekk_Latn
+  0%|          | 0/32492 [00:00<?, ?it/s]100%|██████████| 32492/32492 [00:00<00:00, 399370.90it/s]
+New vocab size: 23041
+# of words that were filtered out using full word frequencies 4840
+# of filtered-out single-character words: 81
+------------------------------------------------------
+LANGUAGE: ell_Grek
+  0%|          | 0/32143 [00:00<?, ?it/s]100%|██████████| 32143/32143 [00:00<00:00, 370739.36it/s]
+New vocab size: 15115
+# of words that were filtered out using full word frequencies 9414
+# of filtered-out single-character words: 56
+------------------------------------------------------
+LANGUAGE: eng_Latn
+  0%|          | 0/32420 [00:00<?, ?it/s]100%|██████████| 32420/32420 [00:00<00:00, 394488.32it/s]
+New vocab size: 21503
+# of words that were filtered out using full word frequencies 2241
+# of filtered-out single-character words: 27
+------------------------------------------------------
+LANGUAGE: fin_Latn
+  0%|          | 0/32516 [00:00<?, ?it/s]100%|██████████| 32516/32516 [00:00<00:00, 441704.44it/s]
+New vocab size: 18890
+# of words that were filtered out using full word frequencies 4495
+# of filtered-out single-character words: 61
+------------------------------------------------------
+LANGUAGE: fra_Latn
+  0%|          | 0/32445 [00:00<?, ?it/s]100%|██████████| 32445/32445 [00:00<00:00, 443044.41it/s]
+New vocab size: 21357
+# of words that were filtered out using full word frequencies 3813
+# of filtered-out single-character words: 44
+------------------------------------------------------
+LANGUAGE: heb_Hebr
+  0%|          | 0/19509 [00:00<?, ?it/s]100%|██████████| 19509/19509 [00:00<00:00, 463205.70it/s]
+New vocab size: 10556
+# of words that were filtered out using full word frequencies 752
+# of filtered-out single-character words: 0
+------------------------------------------------------
+LANGUAGE: hrv_Latn
+  0%|          | 0/32300 [00:00<?, ?it/s]100%|██████████| 32300/32300 [00:00<00:00, 409513.33it/s]
+New vocab size: 18734
+# of words that were filtered out using full word frequencies 2386
+# of filtered-out single-character words: 23
+------------------------------------------------------
+LANGUAGE: hun_Latn
+  0%|          | 0/32608 [00:00<?, ?it/s]100%|██████████| 32608/32608 [00:00<00:00, 442112.24it/s]
+New vocab size: 19370
+# of words that were filtered out using full word frequencies 1464
+# of filtered-out single-character words: 12
+------------------------------------------------------
+LANGUAGE: hye_Armn
+  0%|          | 0/32322 [00:00<?, ?it/s]100%|██████████| 32322/32322 [00:00<00:00, 379949.59it/s]
+New vocab size: 18521
+# of words that were filtered out using full word frequencies 4149
+# of filtered-out single-character words: 18
+------------------------------------------------------
+LANGUAGE: ind_Latn
+  0%|          | 0/31490 [00:00<?, ?it/s]100%|██████████| 31490/31490 [00:00<00:00, 537615.28it/s]
+New vocab size: 15540
+# of words that were filtered out using full word frequencies 2633
+# of filtered-out single-character words: 11
+------------------------------------------------------
+LANGUAGE: ita_Latn
+  0%|          | 0/30819 [00:00<?, ?it/s]100%|██████████| 30819/30819 [00:00<00:00, 461308.78it/s]
+New vocab size: 19164
+# of words that were filtered out using full word frequencies 4601
+# of filtered-out single-character words: 21
+------------------------------------------------------
+LANGUAGE: jpn_Jpan
+  0%|          | 0/26992 [00:00<?, ?it/s]100%|██████████| 26992/26992 [00:00<00:00, 373418.52it/s]
+New vocab size: 16370
+# of words that were filtered out using full word frequencies 619
+# of filtered-out single-character words: 0
+------------------------------------------------------
+LANGUAGE: kat_Geor
+  0%|          | 0/31431 [00:00<?, ?it/s]100%|██████████| 31431/31431 [00:00<00:00, 373321.92it/s]
+New vocab size: 14813
+# of words that were filtered out using full word frequencies 8483
+# of filtered-out single-character words: 48
+------------------------------------------------------
+LANGUAGE: kor_Hang
+  0%|          | 0/31956 [00:00<?, ?it/s]100%|██████████| 31956/31956 [00:00<00:00, 462893.68it/s]
+New vocab size: 15581
+# of words that were filtered out using full word frequencies 2622
+# of filtered-out single-character words: 0
+------------------------------------------------------
+LANGUAGE: lit_Latn
+  0%|          | 0/32581 [00:00<?, ?it/s]100%|██████████| 32581/32581 [00:00<00:00, 469497.02it/s]
+New vocab size: 17577
+# of words that were filtered out using full word frequencies 2788
+# of filtered-out single-character words: 10
+------------------------------------------------------
+LANGUAGE: lvs_Latn
+  0%|          | 0/32472 [00:00<?, ?it/s]100%|██████████| 32472/32472 [00:00<00:00, 426977.99it/s]
+New vocab size: 18708
+# of words that were filtered out using full word frequencies 4680
+# of filtered-out single-character words: 25
+------------------------------------------------------
+LANGUAGE: mkd_Cyrl
+  0%|          | 0/32494 [00:00<?, ?it/s]100%|██████████| 32494/32494 [00:00<00:00, 413575.63it/s]
+New vocab size: 17910
+# of words that were filtered out using full word frequencies 1552
+# of filtered-out single-character words: 0
+------------------------------------------------------
+LANGUAGE: nld_Latn
+  0%|          | 0/32493 [00:00<?, ?it/s]100%|██████████| 32493/32493 [00:00<00:00, 443277.02it/s]
+New vocab size: 21352
+# of words that were filtered out using full word frequencies 3955
+# of filtered-out single-character words: 5
+------------------------------------------------------
+LANGUAGE: nob_Latn
+  0%|          | 0/32599 [00:00<?, ?it/s]100%|██████████| 32599/32599 [00:00<00:00, 434065.24it/s]
+New vocab size: 22450
+# of words that were filtered out using full word frequencies 3898
+# of filtered-out single-character words: 28
+------------------------------------------------------
+LANGUAGE: pol_Latn
+  0%|          | 0/32334 [00:00<?, ?it/s]100%|██████████| 32334/32334 [00:00<00:00, 396521.34it/s]
+New vocab size: 22248
+# of words that were filtered out using full word frequencies 6197
+# of filtered-out single-character words: 20
+------------------------------------------------------
+LANGUAGE: por_Latn
+  0%|          | 0/32534 [00:00<?, ?it/s]100%|██████████| 32534/32534 [00:00<00:00, 431049.96it/s]
+New vocab size: 21875
+# of words that were filtered out using full word frequencies 4060
+# of filtered-out single-character words: 47
+------------------------------------------------------
+LANGUAGE: ron_Latn
+  0%|          | 0/31844 [00:00<?, ?it/s]100%|██████████| 31844/31844 [00:00<00:00, 436605.89it/s]
+New vocab size: 21279
+# of words that were filtered out using full word frequencies 4421
+# of filtered-out single-character words: 75
+------------------------------------------------------
+LANGUAGE: rus_Cyrl
+  0%|          | 0/32268 [00:00<?, ?it/s]100%|██████████| 32268/32268 [00:00<00:00, 340089.81it/s]
+New vocab size: 20788
+# of words that were filtered out using full word frequencies 6257
+# of filtered-out single-character words: 14
+------------------------------------------------------
+LANGUAGE: slk_Latn
+  0%|          | 0/32558 [00:00<?, ?it/s]100%|██████████| 32558/32558 [00:00<00:00, 480055.93it/s]
+New vocab size: 16982
+# of words that were filtered out using full word frequencies 2039
+# of filtered-out single-character words: 8
+------------------------------------------------------
+LANGUAGE: slv_Latn
+  0%|          | 0/32495 [00:00<?, ?it/s]100%|██████████| 32495/32495 [00:00<00:00, 414307.50it/s]
+New vocab size: 22796
+# of words that were filtered out using full word frequencies 4259
+# of filtered-out single-character words: 50
+------------------------------------------------------
+LANGUAGE: spa_Latn
+  0%|          | 0/32230 [00:00<?, ?it/s]100%|██████████| 32230/32230 [00:00<00:00, 440780.13it/s]
+New vocab size: 20872
+# of words that were filtered out using full word frequencies 4220
+# of filtered-out single-character words: 2
+------------------------------------------------------
+LANGUAGE: swe_Latn
+  0%|          | 0/32486 [00:00<?, ?it/s]100%|██████████| 32486/32486 [00:00<00:00, 418427.03it/s]
+New vocab size: 23189
+# of words that were filtered out using full word frequencies 4209
+# of filtered-out single-character words: 44
+------------------------------------------------------
+LANGUAGE: tam_Taml
+  0%|          | 0/30490 [00:00<?, ?it/s]100%|██████████| 30490/30490 [00:00<00:00, 486133.90it/s]
+New vocab size: 10515
+# of words that were filtered out using full word frequencies 1301
+# of filtered-out single-character words: 2
+------------------------------------------------------
+LANGUAGE: tha_Thai
+  0%|          | 0/24672 [00:00<?, ?it/s]100%|██████████| 24672/24672 [00:00<00:00, 611175.96it/s]
+New vocab size: 6950
+# of words that were filtered out using full word frequencies 256
+# of filtered-out single-character words: 58
+------------------------------------------------------
+LANGUAGE: tur_Latn
+  0%|          | 0/29656 [00:00<?, ?it/s]100%|██████████| 29656/29656 [00:00<00:00, 389408.06it/s]
+New vocab size: 21407
+# of words that were filtered out using full word frequencies 3930
+# of filtered-out single-character words: 57
+------------------------------------------------------
+LANGUAGE: ukr_Cyrl
+  0%|          | 0/32492 [00:00<?, ?it/s]100%|██████████| 32492/32492 [00:00<00:00, 325899.34it/s]
+New vocab size: 18678
+# of words that were filtered out using full word frequencies 5471
+# of filtered-out single-character words: 10
+------------------------------------------------------
+LANGUAGE: vie_Latn
+  0%|          | 0/28360 [00:00<?, ?it/s]100%|██████████| 28360/28360 [00:00<00:00, 504775.99it/s]
+New vocab size: 15470
+# of words that were filtered out using full word frequencies 3254
+# of filtered-out single-character words: 37
+------------------------------------------------------
