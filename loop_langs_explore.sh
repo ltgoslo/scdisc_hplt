@@ -7,6 +7,6 @@ do
   for f in "${fields[@]}"; 
   do
       sbatch extract.slurm $p $f
-  done	
+  done
 done < ${1}
 
