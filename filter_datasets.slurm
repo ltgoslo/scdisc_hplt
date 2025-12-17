@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=lchange
 #SBATCH --account=nn10029k
-#SBATCH --time=5:00:00
+#SBATCH --time=10:00:00
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=6
 #SBATCH --mem-per-cpu=1G
@@ -24,5 +24,4 @@ for period in "${periods[@]}";
         echo ${period}
         apptainer exec -B /cluster/projects/:/cluster/projects/,/cluster/work/projects/:/cluster/work/projects/ $SIF python3 src/filter_non_target_segments_tokenized.py --language ${LANG} --period ${period} --data-dir ${DATA}  | zstd > ${DATA}${LANG}/${period}_tokens_filtered.jsonl.zst &
     done
-
 wait
