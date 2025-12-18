@@ -38,9 +38,7 @@ if __name__ == "__main__":
         cores = int(args.cores)
     else:
         # Use all cores we have access to except one
-        cores = (
-            multiprocessing.cpu_count() - 1
-        )
+        cores = multiprocessing.cpu_count() - 1
     logger.info(f"Number of cores to use: {cores}")
 
     # Setting up training hyperparameters:
@@ -86,6 +84,8 @@ if __name__ == "__main__":
     model.wv.save(word2vec_dir + filename)
 
     # Save the model in the word2vec binary format
-    model.wv.save_word2vec_format(word2vec_dir + filename.replace(".model", ".bin"), binary=True)
+    model.wv.save_word2vec_format(
+        word2vec_dir + filename.replace(".model", ".bin"), binary=True
+    )
 
     # model.save(filename)  # If you intend to train the model further

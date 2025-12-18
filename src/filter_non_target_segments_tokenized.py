@@ -17,6 +17,7 @@ def find_first_last_occurrences(lst, items):
             last = last_index
     return first, last
 
+
 def main():
     """Script to process the tokenized data."""
     usage = "usage: %prog [options] arg"
@@ -65,7 +66,12 @@ def main():
 
     infile = os.path.join(data_dir, language, f"{period}_tokens.jsonl.gz")
 
-    total_doc_count, total_segment_count, filtered_segment_count, trunc_segm_count = 0, 0, 0, 0
+    total_doc_count, total_segment_count, filtered_segment_count, trunc_segm_count = (
+        0,
+        0,
+        0,
+        0,
+    )
 
     with open(infile) as in_f:
         for line in tqdm(in_f, total=10**6, mininterval=60):
@@ -92,7 +98,9 @@ def main():
                     target_words_found = segment_tokens.intersection(target_words)
                     if target_words_found:
                         if length > max_len:
-                            first, last = find_first_last_occurrences(segment, target_words_found)
+                            first, last = find_first_last_occurrences(
+                                segment, target_words_found
+                            )
                             target_span_length = last - first
                             if target_span_length >= max_len:
                                 # we have to sacrifice something
@@ -115,7 +123,7 @@ def main():
                             segment = segment[truncation_start:truncation_end]
                             tti = tti[truncation_start:truncation_end]
                             am = am[truncation_start:truncation_end]
-                        assert(len(segment) <= max_len)
+                        assert len(segment) <= max_len
                         print(
                             json.dumps(
                                 {
