@@ -6,6 +6,7 @@ import logging
 import gensim
 import numpy as np
 from os import path
+import json
 
 
 def smart_procrustes_align_gensim(
@@ -63,6 +64,8 @@ if __name__ == "__main__":
     arg("--emb0", "-e0", help="Base model", required=True)
     arg("--emb1", "-e1", help="Model to align with the base one", required=True)
     arg("--changes", "-c", help="How many most changed words to show?", type=int)
+    arg("--targets", "-t", help="Path to T5 target words list")
+
     args = parser.parse_args()
 
     models = []
@@ -94,6 +97,26 @@ if __name__ == "__main__":
         shifts = [
             f"{similarities[el]:0.3}\t{shared_vocabulary[el]}" for el in min_indices
         ]
-        logger.info("Most changed words (with similarities):")
+        logger.info(f"Most changed words for {filename} (with similarities):")
         for el in sorted(shifts):
             logger.info(el)
+
+    if args.targets:
+        logger.info(f"Lists of model words overlapping with corresponding T5 vocabulary saved to {directory}")
+        # Load target words from the T5 model
+        with open(args.targets) as f:
+            target_words = json.load(f)
+            targets = set(target_words.keys())
+
+        t5_overlap = set(models[1].key_to_index).intersection(targets)
+        with open(path.join(directory, filename.split(".")[0] + "_t5_vocab.txt"), "w") as f:
+            for el in sorted(t5_overlap):
+                f.write(el + "\n")
+
+        if "2021" in args.emb1:
+            # Dirty hack to avoid double writing into the 2024 vocab file
+            t5_overlap = set(models[0].key_to_index).intersection(targets)
+            directory, filename = path.split(args.emb0)
+            with open(path.join(directory, filename.split(".")[0] + "_t5_vocab.txt"), "w") as f:
+                for el in sorted(t5_overlap):
+                    f.write(el + "\n")
