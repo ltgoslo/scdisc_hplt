@@ -17,6 +17,5 @@ echo "SLURM_NTASKS: $SLURM_NTASKS"
 
 SIF="/cluster/projects/nn9851k/containers/pytorch2.7_cu2.9_py3.12_amd_nlpl.sif"
 
-srun apptainer exec -B /cluster/projects/:/cluster/projects/,/cluster/work/projects/:/cluster/work/projects/ $SIF python3 tokenize.py ${@}
+srun apptainer exec -B /cluster/projects/:/cluster/projects/,/cluster/work/projects/:/cluster/work/projects/ $SIF python3 tokenize_data.py ${@}
 
-    
