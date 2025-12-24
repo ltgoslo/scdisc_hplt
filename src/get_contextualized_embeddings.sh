@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=t5predict
-#SBATCH --account=nn10029k
-#SBATCH --time=6:00:00
+#SBATCH --account=nn9851k
+#SBATCH --time=60:00:00
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=2
 #SBATCH --ntasks-per-node=1

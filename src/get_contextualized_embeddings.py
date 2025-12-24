@@ -43,7 +43,7 @@ def main():
                       help='Batch size: default=%default')
     parser.add_option('--max-packet-size', 
                       type=int,
-                      default=2e+9,
+                      default=3e+9,
                       help='The packet size for word embedding packets: default=%default')
     (options, args) = parser.parse_args()
 
@@ -51,11 +51,11 @@ def main():
     assert period in {'2011_2015', '2020_2021', '2024_2025'}
     
     data_dir = options.data_dir
-    embeddings_dir = options.embeddings_dir
+    language = options.language
+    embeddings_dir = options.embeddings_dir + f"_{language}"
     if embeddings_dir is None:
         embeddings_dir = '../representations/{}/{}__embeddings'.format(language, period)
 
-    language = options.language
     max_batch_size = options.max_batch_size
     embedder = Embedder(
         embeddings_dir, max_batch_size, language, options.max_packet_size, options.model_name,
@@ -70,7 +70,7 @@ def main():
         # Embed segments in batches
         segments_batch = []
         segment_ids_batch = []
-        embedding_packet_data = {token_id.item(): [[], []] for token_id in embedder.target_token_ids}
+        embedding_packet_data = {}
         embedding_packet_size = 0
         for line in tqdm(stream):
             if len(embedder.target_token_ids) == 0:
@@ -104,7 +104,9 @@ def main():
         # save the remaining embedding packet
         if len(embedding_packet_data) > 0:
             embedder.save_embeddings_packet(embedding_packet_data)
-
+        print(embedder.target_counter, flush=True)
+        with open(os.path.join(embeddings_dir, "lemmas_counter.json"), 'w') as f:
+            json.dump(embedder.target_counter, f, ensure_ascii=False)
 
 if __name__ == '__main__':
     main()

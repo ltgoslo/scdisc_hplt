@@ -35,14 +35,21 @@ class Embedder:
             target_words = json.load(f)
         self.target_token_ids = torch.tensor([token_id for token_id in target_words.values()]).to("cuda")
         self.target_counter = defaultdict(int)
+        with open(f"../languages/{language}/pos_tagged_T5_vocabulary.json", "r") as lemmas_f:
+            lemmas_dict = json.load(lemmas_f)
+        self.id2lemma = {}
+        self.lemma2id = defaultdict(list)
+        for value in lemmas_dict.values():
+            self.id2lemma[value["id"]] = value["lemma"]
+            self.lemma2id[value["lemma"]].append(value["id"])
 
 
     def save_embeddings_packet(self, embedding_packet_data):
         self.embedding_packet_count += 1
-        output_file = os.path.join(self.embeddings_dir, str(self.embedding_packet_count) + 'pt.gz')
-        with gzip.GzipFile(output_file, 'wb') as f:
-            torch.save(embedding_packet_data, f)
-        return {token_id.item(): [[], []] for token_id in self.target_token_ids}, 0
+        for letter, letter_data in embedding_packet_data.items():
+            with gzip.GzipFile(os.path.join(self.embeddings_dir, f"{letter}_{self.embedding_packet_count}.pt.gz"), 'wb') as fout:
+                torch.save(letter_data, fout)
+        return {}, 0
 
 
     def process_batch(self, segments_batch, segment_ids_batch, embedding_packet_data, embedding_packet_size):
@@ -56,24 +63,36 @@ class Embedder:
                 outputs = self.encoder_model(input_ids=input_ids, attention_mask=attention_mask, output_hidden_states=True)
             embeddings = outputs.last_hidden_state
             target_indices = torch.unique(torch.where(target_position_mask, embeddings, 0).nonzero(as_tuple=False)[:,:2], dim=0)
-            embeddings_batch = {token_id.item(): [[], []] for token_id in self.target_token_ids}
+            embeddings_batch = {}
             this_batch_counter = 0
             for idx in target_indices:
                 segment_id = idx[0]
                 token_id = input_ids[segment_id, idx[1]]
                 token_id_item = token_id.item()
-                if self.target_counter[token_id_item] < 999:
+                lemma = self.id2lemma[token_id_item]
+                if self.target_counter[lemma] < 1000:
+                    if embeddings_batch.get(lemma) is None:
+                        embeddings_batch[lemma] = [[],[]]
                     embedding = embeddings[segment_id, idx[1]]
-                    embeddings_batch[token_id_item][0].append(embedding.detach().cpu())   
-                    embeddings_batch[token_id_item][1].append(segment_ids_batch[segment_id])
+                    embeddings_batch[lemma][0].append(embedding.unsqueeze(0).detach().cpu())   
+                    embeddings_batch[lemma][1].append(segment_ids_batch[segment_id])
                     this_batch_counter += 1
-                    self.target_counter[token_id_item] += 1
-                    if self.target_counter[token_id_item] == 999:
-                        self.target_token_ids = self.target_token_ids[self.target_token_ids != token_id_item]
+                    self.target_counter[lemma] += 1
+                    if self.target_counter[lemma] == 1000:
+                        self.target_token_ids = self.target_token_ids[
+                            ~torch.isin(self.target_token_ids, torch.tensor(self.lemma2id[lemma]).to("cuda"))
+                        ]
 
-            for token_id in embeddings_batch.keys():
-                embedding_packet_data[token_id][0].extend(embeddings_batch[token_id][0])
-                embedding_packet_data[token_id][1].extend(embeddings_batch[token_id][1])
+            for lemma in embeddings_batch.keys():
+                first_letter = lemma[0].lower()
+                if embedding_packet_data.get(first_letter) is None:
+                    embedding_packet_data[first_letter] = {}
+                if embedding_packet_data[first_letter].get(lemma) is None:
+                    embedding_packet_data[first_letter][lemma] = [[torch.zeros(1, 768)], []]
+                embedding_packet_data[first_letter][lemma][0] = [
+                    torch.cat(embedding_packet_data[first_letter][lemma][0] + embeddings_batch[lemma][0], 0),
+                ]
+                embedding_packet_data[first_letter][lemma][1].extend(embeddings_batch[lemma][1])
 
             embedding_packet_size += self.embedding_size * this_batch_counter # ignoring the size of containers (dict and lists)
             if embedding_packet_size > self.max_packet_size:
