@@ -1,4 +1,3 @@
-from collections import defaultdict
 import os
 import io
 import json
@@ -52,9 +51,7 @@ def main():
     
     data_dir = options.data_dir
     language = options.language
-    embeddings_dir = options.embeddings_dir + f"_{language}"
-    if embeddings_dir is None:
-        embeddings_dir = '../representations/{}/{}__embeddings'.format(language, period)
+    embeddings_dir = '{}/{}/{}__embeddings'.format(options.embeddings_dir, language, period)
 
     max_batch_size = options.max_batch_size
     embedder = Embedder(
