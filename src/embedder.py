@@ -40,8 +40,11 @@ class Embedder:
         self.id2lemma = {}
         self.lemma2id = defaultdict(list)
         for value in lemmas_dict.values():
-            self.id2lemma[value["id"]] = value["lemma"]
-            self.lemma2id[value["lemma"]].append(value["id"])
+            lemma = value["lemma"]
+            if language != "deu_Latn":
+                lemma = lemma.lower()
+            self.id2lemma[value["id"]] = lemma
+            self.lemma2id[lemma].append(value["id"])
 
 
     def save_embeddings_packet(self, embedding_packet_data):
