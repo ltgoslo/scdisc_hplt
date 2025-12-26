@@ -31,9 +31,15 @@ class Embedder:
         self.encoder_model = full_model.get_encoder()
         print(f"Model loaded: {model_name}", flush=True)
         # Load target words
-        with open(os.path.join("../languages", language, 'target_words.json')) as f:
-            target_words = json.load(f)
-        self.target_token_ids = torch.tensor([token_id for token_id in target_words.values()]).to("cuda")
+        updated = os.path.join(embeddings_dir, "target_ids.pt.gz")
+        if not os.path.exists(updated):
+            with open(os.path.join("../languages", language, 'target_words.json')) as f:
+                target_words = json.load(f)
+            self.target_token_ids = torch.tensor([token_id for token_id in target_words.values()]).to("cuda")
+        else:
+            with gzip.GzipFile(updated, 'rb') as f:
+                self.target_token_ids = torch.load(f).to("cuda")
+
         self.target_counter = defaultdict(int)
         with open(f"../languages/{language}/pos_tagged_T5_vocabulary.json", "r") as lemmas_f:
             lemmas_dict = json.load(lemmas_f)

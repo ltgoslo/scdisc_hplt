@@ -45,7 +45,7 @@ def main():
                       default=3e+9,
                       help='The packet size for word embedding packets: default=%default')
     (options, args) = parser.parse_args()
-
+    print(options, flush=True)
     period = options.period
     assert period in {'2011_2015', '2020_2021', '2024_2025'}
     
