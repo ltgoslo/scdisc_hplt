@@ -9,7 +9,7 @@ from torch.nn.utils.rnn import pad_sequence
 
 
 class Embedder:
-    def __init__(self, embeddings_dir, batch_size, language, max_packet_size, model_name=None):
+    def __init__(self, embeddings_dir, batch_size, language, max_packet_size, model_name=None, cache_dir="~/.cache/huggingface/"):
         if not os.path.exists(embeddings_dir):
             os.makedirs(embeddings_dir)
         self.embeddings_dir = embeddings_dir
@@ -23,9 +23,11 @@ class Embedder:
             model_name = 'HPLT/hplt_t5_base_3_0_{}'.format(language)
         # Load tokenizer for pretrained model
         print('Loading the tokenizer ({})...'.format(model_name), flush=True)
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=cache_dir)
         self.pad_token_id = tokenizer.convert_tokens_to_ids("[PAD]")
-        full_model = AutoModelForSeq2SeqLM.from_pretrained(model_name, trust_remote_code=True, use_safetensors=False)
+        full_model = AutoModelForSeq2SeqLM.from_pretrained(
+            model_name, trust_remote_code=True, use_safetensors=False, cache_dir=cache_dir,
+        )
         full_model.eval()
         full_model.to('cuda') # GPU
         self.encoder_model = full_model.get_encoder()

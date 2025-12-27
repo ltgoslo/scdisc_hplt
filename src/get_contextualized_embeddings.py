@@ -44,6 +44,7 @@ def main():
                       type=int,
                       default=3e+9,
                       help='The packet size for word embedding packets: default=%default')
+    parser.add_option('--cache_dir', default="~/.cache/huggingface/")
     (options, args) = parser.parse_args()
     print(options, flush=True)
     period = options.period
@@ -55,7 +56,7 @@ def main():
 
     max_batch_size = options.max_batch_size
     embedder = Embedder(
-        embeddings_dir, max_batch_size, language, options.max_packet_size, options.model_name,
+        embeddings_dir, max_batch_size, language, options.max_packet_size, options.model_name, options.cache_dir,
     )
     
     infile = os.path.join(data_dir, language, '{}_tokens_filtered.jsonl.zst'.format(period))
