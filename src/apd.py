@@ -45,11 +45,11 @@ for combination in combinations(periods, 2):
         print(second_embedding.size())
         samples_1 = first_embedding.size()[0]
         samples_2 = second_embedding.size()[0]
-        min_samples = min(samples_1, samples_2)
+        min_samples = min(samples_1, samples_2, 1000)
         first_embedding = first_embedding[:min_samples, :]
         second_embedding = second_embedding[:min_samples, :]
         assert first_embedding.size()[1] == 768
         assert second_embedding.size()[1] == 768
         sim = cos(first_embedding, second_embedding)
         print(sim.size(), flush=True)
-        print(torch.mean(sim), flush=True)
+        print(1 - torch.mean(sim), flush=True)
