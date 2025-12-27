@@ -48,7 +48,7 @@ def main():
     
     data_dir = options.data_dir
     language = options.language
-    output_dir = '{}/{}/{}__substitutions-test'.format(options.output_dir, language, period)
+    output_dir = '{}/{}/{}__substitutions'.format(options.output_dir, language, period)
     os.makedirs(output_dir, exist_ok=True)
     max_batch_size = options.max_batch_size
     substitutor = Substitutor(
@@ -79,7 +79,7 @@ def main():
                 )
                 segments_batch = []
                 segment_ids_batch = []
-                break
+                
         # process the last batch
         if len(segment_ids_batch) > 0:
             substitutor.process_batch(

@@ -64,7 +64,7 @@ class Substitutor:
             eos_token_id=self.mask_2_id,
         )
 
-        for lemma, out, segment_id in tqdm(zip(lemmas, output_tensor, segment_ids_batch)):
+        for lemma, out, segment_id in zip(lemmas, output_tensor, segment_ids_batch):
             prediction = self.tokenizer.decode(out.detach().cpu(), skip_special_tokens=True)
             shard_file = self.shard_files[lemma[0]]
             shard_file.write(json.dumps({lemma: [prediction, segment_id]}) + "\n")
