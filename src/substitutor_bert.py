@@ -1,14 +1,14 @@
 from collections import defaultdict
+import logging
 import gzip
 import json
 import os
 
 import torch
 from torch.nn.utils.rnn import pad_sequence
-from tqdm import tqdm
 from transformers import AutoModelForMaskedLM, AutoTokenizer
 
-
+logging.basicConfig(level=logging.INFO)
 class Substitutor:
     def __init__(self, output_dir, cache_dir, batch_size=400, language="eng_Latn", model_name=None):
         if model_name is None:
@@ -25,8 +25,8 @@ class Substitutor:
         with open(os.path.join("../languages", language, 'target_words.json')) as f:
             target_words = json.load(f)
         tokenizer_fullwords = {
-            self.tokenizer.convert_tokens_to_string([tok]): tok_id for tok, tok_id in self.tokenizer.vocab.items() if tok.startswith("âĸģ")
-            #"AI": 6944, "remote": 6111, "jurisdiction": 12919, "legislative": 9935,
+            #self.tokenizer.convert_tokens_to_string([tok]): tok_id for tok, tok_id in self.tokenizer.vocab.items() if tok.startswith("âĸģ")
+            "AI": 6944, "remote": 6111, "jurisdiction": 12919, "legislative": 9935,
         }
         target_token_ids = []
         for target_word in target_words:
@@ -67,11 +67,13 @@ class Substitutor:
 
 
     def _run_prediction(self, batch, lemmas, segment_ids_batch, indices):
+        logging.debug(f"Batch {batch}")
+        logging.debug(f"segment_ids_batch {segment_ids_batch}")
         input_ids = pad_sequence(batch, batch_first=True, padding_value=self.pad_token_id)
         attention_mask = (input_ids > self.pad_token_id).int()
         with torch.no_grad():
             token_logits = self.full_model(input_ids, attention_mask).logits
-        for lemma, out, segment_id, idx in tqdm(zip(lemmas, token_logits, segment_ids_batch, indices)):
+        for lemma, out, segment_id, idx in zip(lemmas, token_logits, segment_ids_batch, indices):
             out = out[idx]
             topk_tokens = torch.topk(out, self.top_k+10, dim=0)
             prediction = self.tokenizer.batch_decode(topk_tokens.indices.detach().cpu())
@@ -82,6 +84,7 @@ class Substitutor:
                 self.target_token_ids = self.target_token_ids[
                     ~torch.isin(self.target_token_ids, torch.tensor(self.lemma2id[lemma]).to("cuda"))
                 ]
+                print(f"Current size of target ids: {self.target_token_ids.size()}", flush=True)
         batch = []
         lemmas = []
         segment_ids_batch = []
@@ -99,6 +102,7 @@ class Substitutor:
             target_position_mask = torch.isin(segment, self.target_token_ids)
             if target_position_mask.any():
                 target_indices = torch.unique(torch.where(target_position_mask, segment, 0).nonzero(as_tuple=False)[:,0], dim=0)
+                logging.debug(target_indices)
                 for idx in target_indices:
                     token_id = segment[idx]
                     token_id_item = token_id.item()
@@ -118,5 +122,5 @@ class Substitutor:
                         else:
                             batch, lemmas, segment_ids_batch, indices = self._run_prediction(batch, lemmas, segment_ids_batch, indices)   
                 if batch:
-                    self._run_prediction(batch, lemmas, segment_ids_batch, indices)
+                    batch, lemmas, segment_ids_batch, indices = self._run_prediction(batch, lemmas, segment_ids_batch, indices)
         
