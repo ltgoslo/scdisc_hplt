@@ -47,12 +47,14 @@ class Embedder:
             lemmas_dict = json.load(lemmas_f)
         self.id2lemma = {}
         self.lemma2id = defaultdict(list)
+
         for value in lemmas_dict.values():
             lemma = value["lemma"]
             if language != "deu_Latn":
                 lemma = lemma.lower()
             self.id2lemma[value["id"]] = lemma
             self.lemma2id[lemma].append(value["id"])
+        self.language = language
 
 
     def save_embeddings_packet(self, embedding_packet_data):
@@ -96,6 +98,8 @@ class Embedder:
 
             for lemma in embeddings_batch.keys():
                 first_letter = lemma[0].lower()
+                if self.language in {"arb_Arab", "heb_Hebr"}:
+                    first_letter = lemma[-1].lower()
                 if embedding_packet_data.get(first_letter) is None:
                     embedding_packet_data[first_letter] = {}
                 if embedding_packet_data[first_letter].get(lemma) is None:

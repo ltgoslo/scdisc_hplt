@@ -19,18 +19,21 @@ rank = int(os.environ["SLURM_PROCID"])
 print(rank, flush=True)
 args.input_path = glob(args.input_path)[rank]
 print(args, flush=True)
-langs_mapping = {'arb_Arab': 'ara_Arab'}
+exists = True
 splitted = args.input_path.split('/')
 lang = splitted[-2]
-model_lang = langs_mapping.get(lang, lang)
-if "bert" in args.model_prefix:
-    model_lang = model_lang.replace("_", "-")
-exists = True
-try:
-    tokenizer = AutoTokenizer.from_pretrained(f"{args.model_prefix}{model_lang}")
-except OSError:
-    print(f"no bert for {lang}")
-    exists = False
+if "hplt" in args.model_prefix:
+    langs_mapping = {'arb_Arab': 'ara_Arab'}
+    model_lang = langs_mapping.get(lang, lang)
+    if "bert" in args.model_prefix:
+        model_lang = model_lang.replace("_", "-")
+    try:
+        tokenizer = AutoTokenizer.from_pretrained(f"{args.model_prefix}{model_lang}")
+    except OSError:
+        print(f"no bert for {lang}")
+        exists = False
+else:
+    tokenizer = AutoTokenizer.from_pretrained(args.model_prefix)
 if exists:
     counter = defaultdict(int)
     segment_lengths = 0
