@@ -26,6 +26,7 @@ class Substitutor:
             target_words = json.load(f)
         tokenizer_fullwords = {
             self.tokenizer.convert_tokens_to_string([tok]): tok_id for tok, tok_id in self.tokenizer.vocab.items() if tok.startswith("âĸģ")
+            #"AI": 6944, "remote": 6111, "jurisdiction": 12919, "legislative": 9935,
         }
         target_token_ids = []
         for target_word in target_words:
@@ -61,6 +62,7 @@ class Substitutor:
         self.mask_1 = torch.tensor([self.mask_1_id]).to("cuda")
         self.top_k = 5
         self.batch_size = batch_size
+        self.max_samples = 100
         
 
 
@@ -72,12 +74,11 @@ class Substitutor:
         for lemma, out, segment_id, idx in tqdm(zip(lemmas, token_logits, segment_ids_batch, indices)):
             out = out[idx]
             topk_tokens = torch.topk(out, self.top_k+10, dim=0)
-            print(topk_tokens, flush=True)
             prediction = self.tokenizer.batch_decode(topk_tokens.indices.detach().cpu())
             shard_file = self.shard_files[lemma[0]]
             shard_file.write(json.dumps({lemma: [prediction, segment_id]}) + "\n")
             self.target_counter[lemma] += 1
-            if self.target_counter[lemma] == 1000:
+            if self.target_counter[lemma] == self.max_samples:
                 self.target_token_ids = self.target_token_ids[
                     ~torch.isin(self.target_token_ids, torch.tensor(self.lemma2id[lemma]).to("cuda"))
                 ]
@@ -98,11 +99,11 @@ class Substitutor:
             target_position_mask = torch.isin(segment, self.target_token_ids)
             if target_position_mask.any():
                 target_indices = torch.unique(torch.where(target_position_mask, segment, 0).nonzero(as_tuple=False)[:,0], dim=0)
-                for idx in tqdm(target_indices):
+                for idx in target_indices:
                     token_id = segment[idx]
                     token_id_item = token_id.item()
                     lemma = self.id2lemma[token_id_item]
-                    if self.target_counter[lemma] < 1000:
+                    if self.target_counter[lemma] < self.max_samples:
                         sentence = torch.cat((segment[:idx], self.mask_1, segment[idx + 1:]))
                         if len(batch) < self.batch_size:
                             batch.append(sentence)

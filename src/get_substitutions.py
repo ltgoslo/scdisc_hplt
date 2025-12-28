@@ -7,7 +7,7 @@ import torch
 from tqdm import tqdm
 from optparse import OptionParser
     
-from substitutor import Substitutor
+from substitutor_bert import Substitutor
 
 
 def main():
@@ -26,7 +26,7 @@ def main():
                       help='Time period: default=%default')
     parser.add_option('--model-name', 
                       type=str, 
-                      default="HPLT/hplt_t5_base_3_0_eng_Latn",
+                      default="HPLT/hplt_bert_base_2_0_eng-Latn",
                       help='Model name/path to be utilized during tokenization.')
     parser.add_option('--data-dir',
                       type=str,
