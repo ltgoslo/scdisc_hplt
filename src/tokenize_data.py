@@ -11,6 +11,7 @@ from transformers import AutoTokenizer
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--input_path', default="/cluster/work/projects/nn9851k/corpora/diachronic/*/*zst")
+parser.add_argument('--model_prefix', default="HPLT/hplt_bert_base_2_0_")
 parser.add_argument('--out', default="/cluster/work/projects/nn9851k/mariiaf")
 args = parser.parse_args() 
 
@@ -21,7 +22,10 @@ print(args, flush=True)
 langs_mapping = {'arb_Arab': 'ara_Arab'}
 splitted = args.input_path.split('/')
 lang = splitted[-2]
-tokenizer = AutoTokenizer.from_pretrained(f"HPLT/hplt_t5_base_3_0_{langs_mapping.get(lang, lang)}")
+model_lang = langs_mapping.get(lang, lang)
+if "bert" in args.model_prefix:
+    model_lang = model_lang.replace("_", "-")
+tokenizer = AutoTokenizer.from_pretrained(f"{args.model_prefix}{model_lang}")
 counter = defaultdict(int)
 segment_lengths = 0
 n_segments = 0
