@@ -60,35 +60,24 @@ def main():
         decompressor = zstd.ZstdDecompressor()
         stream_reader = decompressor.stream_reader(in_f)
         stream = io.TextIOWrapper(stream_reader, encoding = "utf-8")
-
-        segments_batch = []
+        batch = []
+        lemmas = []
         segment_ids_batch = []
+        indices = []
         for line in tqdm(stream):
             if len(substitutor.target_token_ids) == 0:
-                segment_ids_batch = []
                 break
             segment_dct = json.loads(line)
             segment_tokens = torch.tensor(segment_dct['input_ids'])
             segment_id = segment_dct['s_id']
-            segment_ids_batch.append(segment_id)
-            segments_batch.append(segment_tokens)
-            if len(segment_ids_batch) >= max_batch_size:
-                substitutor.process_batch(
-                    segments_batch,
-                    segment_ids_batch,
-                )
-                segments_batch = []
-                segment_ids_batch = []
-                
-        # process the last batch
-        if len(segment_ids_batch) > 0:
-            substitutor.process_batch(
-                segments_batch,
-                segment_ids_batch,
-            )
-            segments_batch = []
-            segment_ids_batch = []
 
+            batch, lemmas, segment_ids_batch, indices = substitutor.process(
+                segment_tokens,
+                segment_id,
+                batch, lemmas, segment_ids_batch, indices,
+            )
+        if batch:
+            batch, lemmas, segment_ids_batch, indices = substitutor.run_prediction(batch, lemmas, segment_ids_batch, indices)
         for shard_file in substitutor.shard_files.values():
             shard_file.close()
         print(substitutor.target_counter, flush=True)

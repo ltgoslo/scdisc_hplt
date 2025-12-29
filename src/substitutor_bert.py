@@ -25,8 +25,8 @@ class Substitutor:
         with open(os.path.join("../languages", language, 'target_words.json')) as f:
             target_words = json.load(f)
         tokenizer_fullwords = {
-            #self.tokenizer.convert_tokens_to_string([tok]): tok_id for tok, tok_id in self.tokenizer.vocab.items() if tok.startswith("âĸģ")
-            "AI": 6944, "remote": 6111, "jurisdiction": 12919, "legislative": 9935,
+            self.tokenizer.convert_tokens_to_string([tok]): tok_id for tok, tok_id in self.tokenizer.vocab.items() if tok.startswith("âĸģ")
+            #"AI": 6944, "remote": 6111, "jurisdiction": 12919, "legislative": 9935,
         }
         target_token_ids = []
         for target_word in target_words:
@@ -66,7 +66,7 @@ class Substitutor:
         
 
 
-    def _run_prediction(self, batch, lemmas, segment_ids_batch, indices):
+    def run_prediction(self, batch, lemmas, segment_ids_batch, indices):
         logging.debug(f"Batch {batch}")
         logging.debug(f"segment_ids_batch {segment_ids_batch}")
         input_ids = pad_sequence(batch, batch_first=True, padding_value=self.pad_token_id)
@@ -92,35 +92,29 @@ class Substitutor:
         return batch, lemmas, segment_ids_batch, indices
         
         
-    def process_batch(self, segments, segment_ids):
-        batch = []
-        lemmas = []
-        segment_ids_batch = []
-        indices = []
-        for segment, segment_id in zip(segments, segment_ids):
-            segment = segment.to("cuda")
-            target_position_mask = torch.isin(segment, self.target_token_ids)
-            if target_position_mask.any():
-                target_indices = torch.unique(torch.where(target_position_mask, segment, 0).nonzero(as_tuple=False)[:,0], dim=0)
-                logging.debug(target_indices)
-                for idx in target_indices:
-                    token_id = segment[idx]
-                    token_id_item = token_id.item()
-                    lemma = self.id2lemma[token_id_item]
-                    if self.target_counter[lemma] < self.max_samples:
-                        sentence = torch.cat((segment[:idx], self.mask_1, segment[idx + 1:]))
-                        if len(batch) < self.batch_size:
-                            batch.append(sentence)
-                            lemmas.append(lemma)
-                            segment_ids_batch.append(
-                                (
-                                self.tokenizer.convert_tokens_to_string(self.tokenizer.convert_ids_to_tokens(sentence.detach().cpu())),
-                                segment_id,
-                                )
+    def process(self, segment, segment_id, batch, lemmas, segment_ids_batch, indices):
+        segment = segment.to("cuda")
+        target_position_mask = torch.isin(segment, self.target_token_ids)
+        if target_position_mask.any():
+            target_indices = torch.unique(torch.where(target_position_mask, segment, 0).nonzero(as_tuple=False)[:,0], dim=0)
+            logging.debug(target_indices)
+            for idx in target_indices:
+                token_id = segment[idx]
+                token_id_item = token_id.item()
+                lemma = self.id2lemma[token_id_item]
+                if self.target_counter[lemma] < self.max_samples:
+                    sentence = torch.cat((segment[:idx], self.mask_1, segment[idx + 1:]))
+                    if len(batch) < self.batch_size:
+                        batch.append(sentence)
+                        lemmas.append(lemma)
+                        segment_ids_batch.append(
+                            (
+                            self.tokenizer.convert_tokens_to_string(self.tokenizer.convert_ids_to_tokens(sentence.detach().cpu())),
+                            segment_id,
                             )
-                            indices.append(idx)
-                        else:
-                            batch, lemmas, segment_ids_batch, indices = self._run_prediction(batch, lemmas, segment_ids_batch, indices)   
-                if batch:
-                    batch, lemmas, segment_ids_batch, indices = self._run_prediction(batch, lemmas, segment_ids_batch, indices)
-        
+                        )
+                        indices.append(idx)
+                    else:
+                        batch, lemmas, segment_ids_batch, indices = self.run_prediction(batch, lemmas, segment_ids_batch, indices)   
+        return batch, lemmas, segment_ids_batch, indices
+    
