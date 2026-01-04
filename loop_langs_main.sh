@@ -7,5 +7,6 @@ do
     # sbatch filter_datasets.slurm ${p} /cluster/work/projects/nn9851k/mariiaf/diachronic/
     # sbatch extract_text.slurm ${p} subsets
     # sbatch train_word2vec.slurm ${p} subsets
-    sbatch align_word2vec.slurm ${p} subsets
+    # sbatch align_word2vec.slurm ${p} subsets
+    sbatch merge_embeddings.slurm ${p} /cluster/work/projects/nn9851k/mariiaf/diachronic/
 done < ${1}
