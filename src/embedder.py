@@ -1,4 +1,5 @@
 from collections import defaultdict
+from copy import copy
 import json
 import gzip
 import os
@@ -48,13 +49,16 @@ class Embedder:
         self.id2lemma = {}
         self.lemma2id = defaultdict(list)
 
-        for value in lemmas_dict.values():
+        for tok, value in lemmas_dict.items():
             lemma = value["lemma"]
+            if lemma is None:
+                lemma = copy(tok)
             if language != "deu_Latn":
                 lemma = lemma.lower()
             self.id2lemma[value["id"]] = lemma
             self.lemma2id[lemma].append(value["id"])
         self.language = language
+        self.save_by_size = self.language not in {"cmn_Hans", "jpn_Jpan", "kor_Hang"}
 
 
     def save_embeddings_packet(self, embedding_packet_data):
@@ -63,6 +67,23 @@ class Embedder:
             with gzip.GzipFile(os.path.join(self.embeddings_dir, f"{letter}_{self.embedding_packet_count}.pt.gz"), 'wb') as fout:
                 torch.save(letter_data, fout)
         return {}, 0
+    
+
+    def _process_embedding_packet_data(self, embeddings_batch, embedding_packet_data):
+        first_letter = copy(self.language)
+        for lemma in embeddings_batch.keys():
+            if not self.save_by_size:
+                first_letter = lemma[0].lower() # no need to do anything special for Arabic and Hebrew
+                # see https://unicode.org/reports/tr9/
+            if embedding_packet_data.get(first_letter) is None:
+                embedding_packet_data[first_letter] = {}
+            if embedding_packet_data[first_letter].get(lemma) is None:
+                embedding_packet_data[first_letter][lemma] = [[torch.zeros(1, 768)], []]
+            embedding_packet_data[first_letter][lemma][0] = [
+                torch.cat(embedding_packet_data[first_letter][lemma][0] + embeddings_batch[lemma][0], 0),
+            ]
+            embedding_packet_data[first_letter][lemma][1].extend(embeddings_batch[lemma][1])
+        return embedding_packet_data
 
 
     def process_batch(self, segments_batch, segment_ids_batch, embedding_packet_data, embedding_packet_size):
@@ -95,20 +116,7 @@ class Embedder:
                         self.target_token_ids = self.target_token_ids[
                             ~torch.isin(self.target_token_ids, torch.tensor(self.lemma2id[lemma]).to("cuda"))
                         ]
-
-            for lemma in embeddings_batch.keys():
-                first_letter = lemma[0].lower()
-                if self.language in {"arb_Arab", "heb_Hebr"}:
-                    first_letter = lemma[-1].lower()
-                if embedding_packet_data.get(first_letter) is None:
-                    embedding_packet_data[first_letter] = {}
-                if embedding_packet_data[first_letter].get(lemma) is None:
-                    embedding_packet_data[first_letter][lemma] = [[torch.zeros(1, 768)], []]
-                embedding_packet_data[first_letter][lemma][0] = [
-                    torch.cat(embedding_packet_data[first_letter][lemma][0] + embeddings_batch[lemma][0], 0),
-                ]
-                embedding_packet_data[first_letter][lemma][1].extend(embeddings_batch[lemma][1])
-
+            embedding_packet_data = self._process_embedding_packet_data(embeddings_batch, embedding_packet_data)
             embedding_packet_size += self.embedding_size * this_batch_counter # ignoring the size of containers (dict and lists)
             if embedding_packet_size > self.max_packet_size:
                 embedding_packet_data, embedding_packet_size = self.save_embeddings_packet(embedding_packet_data)
