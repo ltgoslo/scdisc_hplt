@@ -3,6 +3,7 @@ import gzip
 import sys
 import os
 import logging
+from glob import glob
 
 logging.basicConfig(
     format="%(asctime)s : %(levelname)s : %(message)s", level=logging.INFO
@@ -29,27 +30,26 @@ def merge_embeddings(main_dic, new_dic):
 
 initials = set()
 
-input_data = sys.argv[1]
+input_data = sys.argv[1].split(",")
 output_data = sys.argv[2]
-
-with os.scandir(input_data) as period:
-    for entry in period:
-        if entry.name.endswith(".pt.gz"):
-            initials.add(entry.name[0])
+os.makedirs(output_data, exist_ok=True)
+for input_dir in input_data:
+    with os.scandir(input_dir) as period:
+        for entry in period:
+            if entry.name.endswith(".pt.gz"):
+                initials.add(entry.name[0])
 
 for el in initials:
     logger.info(el)
     accum_data = {}
-    with os.scandir(sys.argv[1]) as period:
-        for entry in period:
-            if entry.name == "target_ids.pt.gz":
-                continue
-            if entry.name.endswith(".pt.gz") and entry.name.startswith(el):
-                logger.info(entry.name)
-                with gzip.GzipFile(os.path.join(sys.argv[1], entry.name), "rb") as f:
-                    data = torch.load(f)
-                    logger.info(len(data))
-                    accum_data = merge_embeddings(accum_data, data)
+    for input_dir in input_data:
+        current_initial_files = glob(f"{input_dir}/{el}_*.pt.gz")
+        for initial_file in current_initial_files:
+            logger.info(initial_file)
+            with gzip.GzipFile(initial_file, "rb") as f:
+                data = torch.load(f)
+                logger.info(len(data))
+                accum_data = merge_embeddings(accum_data, data)
     logger.info(len(accum_data))
     with gzip.open(f"{output_data}/{el}.pt.gz", "wb") as of:
         torch.save(accum_data, of)
