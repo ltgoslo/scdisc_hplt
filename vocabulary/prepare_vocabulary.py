@@ -208,7 +208,7 @@ def main():
 		elif language == 'mkd_Cyrl':
 			nlp = classla.Pipeline('mk', dir=pos_tagger_resources_dir)
 		elif language_mapping_info[language][1] is not None:
-			nlp = stanza.Pipeline(language_mapping_info[language][1], processors="tokenize,pos", model_dir=pos_tagger_resources_dir)
+			nlp = stanza.Pipeline(language_mapping_info[language][1], processors="tokenize,pos,lemma", model_dir=pos_tagger_resources_dir)
 		else:
 			raise ExceptionGroup("Part-of-speech tagger not integrated yet!")
 
@@ -233,6 +233,8 @@ def main():
 				
 		# Once refined, the full-word filtering code would go here, but for now it is taking too long to run				
 		with open(os.path.join(data_dir, language, 'pos_tagged_T5_vocabulary.json'), 'w') as f:
+			json.dump(pos_tagged_T5_vocabulary, f)
+		with open(os.path.join(git_dir, language, 'pos_tagged_T5_vocabulary.json'), 'w') as f:
 			json.dump(pos_tagged_T5_vocabulary, f)
 
 
@@ -268,7 +270,6 @@ def main():
 
 	with open(os.path.join(data_dir, language, 'target_words.json'), 'w') as f:
 		json.dump(target_words, f)
-
 	with open(os.path.join(git_dir, language, 'target_words.json'), 'w') as f:
 		json.dump(target_words, f)
 
@@ -276,17 +277,3 @@ def main():
 
 if __name__ == '__main__':
 	main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
