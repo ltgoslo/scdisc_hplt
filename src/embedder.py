@@ -58,7 +58,7 @@ class Embedder:
             self.id2lemma[value["id"]] = lemma
             self.lemma2id[lemma].append(value["id"])
         self.language = language
-        self.save_by_size = self.language not in {"cmn_Hans", "jpn_Jpan", "kor_Hang"}
+        self.save_by_size = self.language in {"cmn_Hans", "jpn_Jpan", "kor_Hang"}
 
 
     def save_embeddings_packet(self, embedding_packet_data):
