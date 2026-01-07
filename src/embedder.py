@@ -4,7 +4,8 @@ import json
 import gzip
 import os
 
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+from transformers import AutoModelForSeq2SeqLM, AutoModelForMaskedLM, AutoTokenizer
+from transformers.modeling_outputs import MaskedLMOutput
 import torch
 from torch.nn.utils.rnn import pad_sequence
 
@@ -26,12 +27,19 @@ class Embedder:
         print('Loading the tokenizer ({})...'.format(model_name), flush=True)
         tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=cache_dir)
         self.pad_token_id = tokenizer.convert_tokens_to_ids("[PAD]")
-        full_model = AutoModelForSeq2SeqLM.from_pretrained(
-            model_name, trust_remote_code=True, use_safetensors=False, cache_dir=cache_dir,
-        )
-        full_model.eval()
-        full_model.to('cuda') # GPU
-        self.encoder_model = full_model.get_encoder()
+        if "t5" in model_name:
+            full_model = AutoModelForSeq2SeqLM.from_pretrained(
+                model_name, trust_remote_code=True, use_safetensors=False, cache_dir=cache_dir,
+            )
+            full_model.eval()
+            full_model.to('cuda') # GPU
+            self.encoder_model = full_model.get_encoder()
+        else:
+            self.encoder_model = AutoModelForMaskedLM.from_pretrained(
+                model_name, trust_remote_code=True, cache_dir=cache_dir,
+            )
+            self.encoder_model.eval()
+            self.encoder_model.to('cuda') # GPU
         print(f"Model loaded: {model_name}", flush=True)
         # Load target words
         updated = os.path.join(embeddings_dir, "target_ids.pt.gz")
@@ -95,7 +103,10 @@ class Embedder:
             # get embeddings of the batch
             with torch.no_grad():
                 outputs = self.encoder_model(input_ids=input_ids, attention_mask=attention_mask, output_hidden_states=True)
-            embeddings = outputs.last_hidden_state
+            if isinstance(outputs, MaskedLMOutput):
+                embeddings = outputs.hidden_states[-1]
+            else:
+                embeddings = outputs.last_hidden_state
             target_indices = torch.unique(torch.where(target_position_mask, embeddings, 0).nonzero(as_tuple=False)[:,:2], dim=0)
             embeddings_batch = {}
             this_batch_counter = 0
