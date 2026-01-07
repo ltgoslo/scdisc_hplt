@@ -57,5 +57,5 @@ for file in glob(os.path.join(in_path, "*.pt.gz")):
         current_size = 0
         current_data = {}
         count += 1
-with open(os.path.join(out_path, "metadata.json", "w")) as meta_f:
+with open(os.path.join(out_path, "metadata.json"), "w") as meta_f:
     json.dump(metadata, f, ensure_ascii=False)
