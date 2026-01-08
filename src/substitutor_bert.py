@@ -1,4 +1,5 @@
 from collections import defaultdict
+from copy import copy
 import logging
 import gzip
 import json
@@ -9,6 +10,8 @@ from torch.nn.utils.rnn import pad_sequence
 from transformers import AutoModelForMaskedLM, AutoTokenizer
 
 logging.basicConfig(level=logging.INFO)
+
+
 class Substitutor:
     def __init__(self, output_dir, cache_dir, batch_size=400, language="eng_Latn", model_name=None):
         if model_name is None:
@@ -24,10 +27,15 @@ class Substitutor:
         self.tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=cache_dir)
         with open(os.path.join("../languages", language, 'target_words.json')) as f:
             target_words = json.load(f)
-        tokenizer_fullwords = {
-            self.tokenizer.convert_tokens_to_string([tok]): tok_id for tok, tok_id in self.tokenizer.vocab.items() if tok.startswith("âĸģ")
-            #"AI": 6944, "remote": 6111, "jurisdiction": 12919, "legislative": 9935,
-        }
+        if "hplt_bert_base_2_0" in model_name:
+            tokenizer_fullwords = {
+                self.tokenizer.convert_tokens_to_string([tok]): tok_id for tok, tok_id in self.tokenizer.vocab.items() if tok.startswith("âĸģ")
+                #"AI": 6944, "remote": 6111, "jurisdiction": 12919, "legislative": 9935,
+            }
+        else:
+            tokenizer_fullwords = {
+                self.tokenizer.convert_tokens_to_string([tok]): tok_id for tok, tok_id in self.tokenizer.vocab.items() if tok.startswith("▁")
+            }
         target_token_ids = []
         for target_word in target_words:
             if target_word in tokenizer_fullwords:
@@ -39,30 +47,39 @@ class Substitutor:
             lemmas_dict = json.load(lemmas_f)
         self.id2lemma = {}
         self.lemma2id = defaultdict(list)
+        self.language = language
+        self.save_by_size = self.language in {"cmn_Hans", "jpn_Jpan", "kor_Hang"}
         first_letters = set()
         for tok, value in lemmas_dict.items():
             if tok in tokenizer_fullwords:
                 if tokenizer_fullwords[tok] in self.target_token_ids:
                     lemma = value["lemma"]
+                    if lemma is None:
+                        lemma = copy(tok)
                     if language != "deu_Latn":
                         lemma = lemma.lower()
                     self.id2lemma[tokenizer_fullwords[tok]] = lemma
                     self.lemma2id[lemma].append(tokenizer_fullwords[tok])
-                    first_letters.add(lemma[0])
-        print(len(first_letters), flush=True)
-        self.shard_files = {}
-        for letter in first_letters:
-            try:
-                self.shard_files[letter] = gzip.open(os.path.join(self.output_dir, f"{letter}.jsonl.gz"), "wt")
-            except ValueError:
-                print(letter, flush=True)
-                raise ValueError
-        self.pad_token_id = self.tokenizer.convert_tokens_to_ids("[PAD]")
-        self.mask_1_id = self.tokenizer.convert_tokens_to_ids("[MASK]")
+                    if not self.save_by_size:
+                        first_letters.add(lemma[0])
+        if not self.save_by_size:
+            print(len(first_letters), flush=True)
+            self.shard_files = {}
+            for letter in first_letters:
+                try:
+                    self.shard_files[letter] = gzip.open(os.path.join(self.output_dir, f"{letter}.jsonl.gz"), "wt")
+                except ValueError:
+                    print(letter, flush=True)
+                    raise ValueError
+        else:
+            self.shard_files[self.language] = gzip.open(os.path.join(self.output_dir, f"{self.language}.jsonl.gz"), "wt")
+        self.pad_token_id = self.tokenizer.convert_tokens_to_ids(self.tokenizer.pad_token)
+        self.mask_1_id = self.tokenizer.convert_tokens_to_ids(self.tokenizer.mask_token)
         self.mask_1 = torch.tensor([self.mask_1_id]).to("cuda")
         self.top_k = 5
         self.batch_size = batch_size
-        self.max_samples = 100
+        self.max_samples = 1000
+        
         
 
 
@@ -77,7 +94,10 @@ class Substitutor:
             out = out[idx]
             topk_tokens = torch.topk(out, self.top_k+10, dim=0)
             prediction = self.tokenizer.batch_decode(topk_tokens.indices.detach().cpu())
-            shard_file = self.shard_files[lemma[0]]
+            if not self.save_by_size:
+                shard_file = self.shard_files[lemma[0]]
+            else:
+                shard_file = self.shard_files[self.language]
             shard_file.write(json.dumps({lemma: [prediction, segment_id]}) + "\n")
             self.target_counter[lemma] += 1
             if self.target_counter[lemma] == self.max_samples:

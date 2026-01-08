@@ -26,7 +26,7 @@ class Embedder:
         # Load tokenizer for pretrained model
         print('Loading the tokenizer ({})...'.format(model_name), flush=True)
         tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=cache_dir)
-        self.pad_token_id = tokenizer.convert_tokens_to_ids("[PAD]")
+        self.pad_token_id = tokenizer.convert_tokens_to_ids(tokenizer.pad_token)
         if "t5" in model_name:
             full_model = AutoModelForSeq2SeqLM.from_pretrained(
                 model_name, trust_remote_code=True, use_safetensors=False, cache_dir=cache_dir,
