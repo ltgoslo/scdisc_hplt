@@ -62,9 +62,9 @@ class Substitutor:
                     self.lemma2id[lemma].append(tokenizer_fullwords[tok])
                     if not self.save_by_size:
                         first_letters.add(lemma[0])
+        self.shard_files = {}
         if not self.save_by_size:
             print(len(first_letters), flush=True)
-            self.shard_files = {}
             for letter in first_letters:
                 try:
                     self.shard_files[letter] = gzip.open(os.path.join(self.output_dir, f"{letter}.jsonl.gz"), "wt")
