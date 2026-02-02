@@ -11,15 +11,15 @@ from torch.nn.utils.rnn import pad_sequence
 
 
 class Embedder:
-    def __init__(self, embeddings_dir, batch_size, language, max_packet_size, model_name=None, cache_dir="~/.cache/huggingface/"):
+    def __init__(self, embeddings_dir, batch_size, language, max_packet_size, model_name=None, cache_dir="~/.cache/huggingface/", embedding_dim=640):
         if not os.path.exists(embeddings_dir):
             os.makedirs(embeddings_dir)
         self.embeddings_dir = embeddings_dir
-        self.embedding_size = 3072
+        self.embedding_size = 3072 # for t5
         self.batch_size = batch_size
         self.max_packet_size = max_packet_size
         self.embedding_packet_count = 0
-
+        self.embedding_dim = embedding_dim
         if model_name is None:
             # By default would use the T5 model pretrained on the data
             model_name = 'HPLT/hplt_t5_base_3_0_{}'.format(language)
@@ -86,7 +86,7 @@ class Embedder:
             if embedding_packet_data.get(first_letter) is None:
                 embedding_packet_data[first_letter] = {}
             if embedding_packet_data[first_letter].get(lemma) is None:
-                embedding_packet_data[first_letter][lemma] = [[torch.zeros(1, 768)], []]
+                embedding_packet_data[first_letter][lemma] = [[torch.zeros(1, self.embedding_dim)], []]
             embedding_packet_data[first_letter][lemma][0] = [
                 torch.cat(embedding_packet_data[first_letter][lemma][0] + embeddings_batch[lemma][0], 0),
             ]

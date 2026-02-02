@@ -9,11 +9,13 @@ import torch
 from torch.nn.utils.rnn import pad_sequence
 from transformers import AutoModelForMaskedLM, AutoTokenizer
 
+from timer import Timer
+
 logging.basicConfig(level=logging.INFO)
 
 
 class Substitutor:
-    def __init__(self, output_dir, cache_dir, batch_size=400, language="eng_Latn", model_name=None):
+    def __init__(self, output_dir, cache_dir, batch_size=400, language="eng_Latn", model_name=None, max_samples=100):
         if model_name is None:
             # By default would use the T5 model pretrained on the data
             model_name = 'HPLT/hplt_bert_base_2_0_{}'.format(language)
@@ -27,21 +29,6 @@ class Substitutor:
         self.tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=cache_dir)
         with open(os.path.join("../languages", language, 'target_words.json')) as f:
             target_words = json.load(f)
-        if "hplt_bert_base_2_0" in model_name:
-            tokenizer_fullwords = {
-                self.tokenizer.convert_tokens_to_string([tok]): tok_id for tok, tok_id in self.tokenizer.vocab.items() if tok.startswith("âĸģ")
-                #"AI": 6944, "remote": 6111, "jurisdiction": 12919, "legislative": 9935,
-            }
-        else:
-            tokenizer_fullwords = {
-                self.tokenizer.convert_tokens_to_string([tok]): tok_id for tok, tok_id in self.tokenizer.vocab.items() if tok.startswith("▁")
-            }
-        target_token_ids = []
-        for target_word in target_words:
-            if target_word in tokenizer_fullwords:
-                target_token_ids.append(tokenizer_fullwords[target_word])
-        print(len(target_token_ids), flush=True)
-        self.target_token_ids = torch.tensor(target_token_ids).to("cuda")
         self.target_counter = defaultdict(int)
         with open(f"../languages/{language}/pos_tagged_T5_vocabulary.json", "r") as lemmas_f:
             lemmas_dict = json.load(lemmas_f)
@@ -50,18 +37,41 @@ class Substitutor:
         self.language = language
         self.save_by_size = self.language in {"cmn_Hans", "jpn_Jpan", "kor_Hang"}
         first_letters = set()
+        same_tokenizer = ("hplt" in model_name) and (not "hplt_bert_base_2_0" in model_name)
+        tokenizer_fullwords = {}
+        if not same_tokenizer:
+            if "hplt_bert_base_2_0" in model_name:
+                tokenizer_fullwords = {
+                    self.tokenizer.convert_tokens_to_string([tok]): tok_id for tok, tok_id in self.tokenizer.vocab.items() if tok.startswith("âĸģ")
+                    #"AI": 6944, "remote": 6111, "jurisdiction": 12919, "legislative": 9935,
+                }
+            else:
+                tokenizer_fullwords = {
+                    self.tokenizer.convert_tokens_to_string([tok]): tok_id for tok, tok_id in self.tokenizer.vocab.items() if tok.startswith("▁")
+                }
+            target_token_ids = []
+            for target_word in target_words:
+                if target_word in tokenizer_fullwords:
+                    target_token_ids.append(tokenizer_fullwords[target_word])
+            self.target_token_ids = torch.tensor(target_token_ids).to("cuda")
+        else:
+            self.target_token_ids = torch.tensor([token_id for token_id in target_words.values()]).to("cuda")
+        print(f"Number of target tokens: {self.target_token_ids.size()}", flush=True)
+        
         for tok, value in lemmas_dict.items():
-            if tok in tokenizer_fullwords:
-                if tokenizer_fullwords[tok] in self.target_token_ids:
-                    lemma = value["lemma"]
-                    if lemma is None:
-                        lemma = copy(tok)
-                    if language != "deu_Latn":
-                        lemma = lemma.lower()
-                    self.id2lemma[tokenizer_fullwords[tok]] = lemma
-                    self.lemma2id[lemma].append(tokenizer_fullwords[tok])
-                    if not self.save_by_size:
-                        first_letters.add(lemma[0])
+            if (value["id"] in self.target_token_ids) or ((tok in tokenizer_fullwords) and (tokenizer_fullwords[tok] in self.target_token_ids)):
+                lemma = value["lemma"]
+                if lemma is None:
+                    lemma = copy(tok)
+                if language != "deu_Latn":
+                    lemma = lemma.lower()
+                id_ = value["id"]
+                if not same_tokenizer:
+                    id_ = tokenizer_fullwords[tok]
+                self.id2lemma[id_] = lemma
+                self.lemma2id[lemma].append(id_)
+                if not self.save_by_size:
+                    first_letters.add(lemma[0])
         self.shard_files = {}
         if not self.save_by_size:
             print(len(first_letters), flush=True)
@@ -78,8 +88,8 @@ class Substitutor:
         self.mask_1 = torch.tensor([self.mask_1_id]).to("cuda")
         self.top_k = 5
         self.batch_size = batch_size
-        self.max_samples = 1000
-        
+        self.max_samples = max_samples
+        self.timer = Timer(16 * 60 * 60)
         
 
 
@@ -125,15 +135,19 @@ class Substitutor:
                 if self.target_counter[lemma] < self.max_samples:
                     sentence = torch.cat((segment[:idx], self.mask_1, segment[idx + 1:]))
                     if len(batch) < self.batch_size:
+                        tokens = self.tokenizer.convert_ids_to_tokens(sentence.detach().cpu())
+                        try: 
+                            segment_ids_batch.append(
+                                (
+                                self.tokenizer.convert_tokens_to_string(tokens),
+                                segment_id,
+                                )
+                            )
+                        except TypeError:
+                            continue
+                        indices.append(idx)
                         batch.append(sentence)
                         lemmas.append(lemma)
-                        segment_ids_batch.append(
-                            (
-                            self.tokenizer.convert_tokens_to_string(self.tokenizer.convert_ids_to_tokens(sentence.detach().cpu())),
-                            segment_id,
-                            )
-                        )
-                        indices.append(idx)
                     else:
                         batch, lemmas, segment_ids_batch, indices = self.run_prediction(batch, lemmas, segment_ids_batch, indices)   
         return batch, lemmas, segment_ids_batch, indices

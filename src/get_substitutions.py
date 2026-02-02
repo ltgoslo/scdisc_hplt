@@ -67,10 +67,13 @@ def main():
         for line in tqdm(stream):
             if len(substitutor.target_token_ids) == 0:
                 break
+            if not substitutor.timer.has_time_remaining():
+                print("No time remaining, breaking", flush=True)
+                break
             segment_dct = json.loads(line)
             segment_tokens = torch.tensor(segment_dct['input_ids'])
             segment_id = segment_dct['s_id']
-
+            
             batch, lemmas, segment_ids_batch, indices = substitutor.process(
                 segment_tokens,
                 segment_id,

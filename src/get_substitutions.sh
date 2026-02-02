@@ -1,14 +1,13 @@
 #!/bin/bash
-#SBATCH --job-name=t5subst
+#SBATCH --job-name=subst
 #SBATCH --account=nn9851k
-#SBATCH --time=60:00:00
+#SBATCH --time=17:00:00
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=2
 #SBATCH --ntasks-per-node=1
-#SBATCH --mem=8G
+#SBATCH --mem=0
 #SBATCH --partition=accel
 #SBATCH --gpus-per-node=1
-
 
 echo "SLURM_TASKS_PER_NODE: $SLURM_TASKS_PER_NODE"
 echo "SLURM_JOB_NODELIST: $SLURM_JOB_NODELIST"
