@@ -22,6 +22,6 @@ periods=("2011_2015" "2020_2021" "2024_2025")
 for period in "${periods[@]}";
     do
         echo ${period}
-        apptainer exec -B /cluster/projects/:/cluster/projects/,/cluster/work/projects/:/cluster/work/projects/ $SIF python3 src/filter_non_target_segments_tokenized.py --language ${LANG} --period ${period} --data-dir ${DATA}  | zstd > ${DATA}${LANG}/${period}_tokens_filtered.jsonl.zst &
+        apptainer exec -B /cluster/projects/:/cluster/projects/,/cluster/work/projects/:/cluster/work/projects/ $SIF python3 filter_non_target_segments_tokenized.py --language ${LANG} --period ${period} --data-dir ${DATA}  | zstd > ${DATA}${LANG}/${period}_tokens_filtered.jsonl.zst &
     done
 wait

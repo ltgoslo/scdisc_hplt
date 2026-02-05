@@ -25,7 +25,7 @@ for period in "${periods[@]}";
     do
         echo ${period}
         # We pass as arguments the path to the training corpus and (optionally) the number of CPU cores we want to use
-        apptainer exec -B /cluster/projects/:/cluster/projects/,/cluster/work/projects/:/cluster/work/projects/ $SIF python3 src/align.py -e0 ${DATA}/${LANG}/word2vec/2024_2025.model -e1 ${DATA}/${LANG}/word2vec/${period}.model -c 10 -t languages/${LANG}/target_words.json &
+        apptainer exec -B /cluster/projects/:/cluster/projects/,/cluster/work/projects/:/cluster/work/projects/ $SIF python3 align.py -e0 ${DATA}/${LANG}/word2vec/2024_2025.model -e1 ${DATA}/${LANG}/word2vec/${period}.model -c 10 -t languages/${LANG}/target_words.json &
     done
 
 wait

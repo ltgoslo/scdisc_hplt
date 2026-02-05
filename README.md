@@ -33,9 +33,9 @@ We look at the distribution of documents by the web crawl (`languages/<language>
 `src/align_word2vec.slurm  <language> <data_model_dir>` --- for the given language and directory for data and word2vec models, the script aligns models from earlier periods to the model from the last period.
 
 ### Contextualized embeddings
-`src/get_many_embeddings.sh` -- obtains T5 embeddings for multiple languages across three time period
+`src/get_many_embeddings.sh` --- obtains T5 embeddings for multiple languages across three time period
 
-`src/get_xlrm_embeddings.sh` -- obtains XLMR embeddings for multiple languages across three time period
+`src/get_xlrm_embeddings.sh` --- obtains XLMR embeddings for multiple languages across three time period
 
 ### Masked-token substitutes 
-`src/get_many_substitutes.sh` -- obtains XLRM substitutes for multiple languages across three time period
+`src/get_many_substitutes.sh` --- obtains XLRM substitutes for multiple languages across three time period

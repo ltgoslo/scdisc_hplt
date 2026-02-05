@@ -26,7 +26,7 @@ for period in "${periods[@]}";
     do
         echo ${period}
         # We pass as arguments the path to the training corpus and (optionally) the number of CPU cores we want to use
-        apptainer exec -B /cluster/projects/:/cluster/projects/,/cluster/work/projects/:/cluster/work/projects/ $SIF python3 src/train_word2vec.py --corpus ${DATA}/${LANG}/${period}.txt.zst --cores $SLURM_CPUS_ON_NODE --vocab 50000 &
+        apptainer exec -B /cluster/projects/:/cluster/projects/,/cluster/work/projects/:/cluster/work/projects/ $SIF python3 train_word2vec.py --corpus ${DATA}/${LANG}/${period}.txt.zst --cores $SLURM_CPUS_ON_NODE --vocab 50000 &
     done
 
 wait
