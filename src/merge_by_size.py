@@ -1,25 +1,25 @@
 import argparse
-from collections import defaultdict
-from glob import glob
-import logging
-import os
 import gzip
 import json
+import logging
+import os
+from collections import defaultdict
+from glob import glob
 
 import torch
-
 
 logging.basicConfig(
     format="%(asctime)s : %(levelname)s : %(message)s", level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 parser = argparse.ArgumentParser()
+parser.add_argument('--langs_path', default="/cluster/work/projects/nn9851k/mariiaf/diachronic")
 parser.add_argument('--lang', default="cmn_Hans")
 parser.add_argument('--period', default="2011_2015")
 args = parser.parse_args()
 
-in_path = f"/cluster/work/projects/nn9851k/mariiaf/diachronic/{args.lang}/{args.period}__embeddings"
-out_path = f"/cluster/work/projects/nn9851k/mariiaf/diachronic/{args.lang}/{args.period}_t5__embeddings"
+in_path = os.path.join(args.langs_path, args.lang, f"{args.period}__embeddings")
+out_path = os.path.join(args.langs_path, args.lang, f"{args.period}_t5__embeddings")
 os.makedirs(out_path, exist_ok=True)
 current_size = 0
 current_data = {}
