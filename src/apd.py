@@ -3,10 +3,21 @@ from itertools import combinations
 from glob import glob
 import gzip
 import os
+import argparse
 
 import torch
 from torch.nn import CosineSimilarity
 from tqdm import tqdm
+
+
+logging.basicConfig(
+    format="%(asctime)s : %(levelname)s : %(message)s", level=logging.INFO
+)
+logger = logging.getLogger(__name__)
+parser = argparse.ArgumentParser()
+parser.add_argument('--langs_path', default="/cluster/work/projects/nn9851k/mariiaf/diachronic")
+parser.add_argument('--lang', default="eng_Latn")
+args = parser.parse_args()
 
 
 periods = {}
@@ -16,7 +27,7 @@ words = target_words_changed + target_words_not_changed
 cos = CosineSimilarity(dim=1, eps=1e-6)
 for period in ("2011_2015", "2020_2021", "2024_2025"):
     print(period, flush=True)
-    embeddings_dir = f"/cluster/work/projects/nn9851k/mariiaf/diachronic/eng_Latn/{period}_t5/"
+    embeddings_dir = os.path.join(args.langs_path, args.lang, f"{period}_t5")
     word_embeddings = defaultdict(list)
     for word in words:
         print(word, flush=True)

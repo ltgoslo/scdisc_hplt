@@ -37,5 +37,9 @@ We look at the distribution of documents by the web crawl (`languages/<language>
 
 `src/get_xlrm_embeddings.sh` --- obtains XLMR embeddings for multiple languages across three time period
 
+**Postprocessing helpers**
+`src/merge_by_size.sh <data_dir> <language> <period>` --- merges embedding files into groups of approximately equal size. See called in `src/merge_lemmas.sh`.
+`src/torch_merge.py` --- merges embedding files into groups based on the first character of their lemma. The resulting output file is formatted as `<first lemma character>.pt.gz`. See called in `src/merge_single_language.sh`.
+
 ### Masked-token substitutes 
 `src/get_many_substitutes.sh` --- obtains XLRM substitutes for multiple languages across three time period
