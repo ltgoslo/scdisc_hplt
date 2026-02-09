@@ -30,16 +30,18 @@ We look at the distribution of documents by the web crawl (`languages/<language>
 
 `src/train_word2vec.slurm <language> <data_model_dir>` --- trains a word2vec model for the given language located under the `data_model_dir` directory.
 
-`src/align_word2vec.slurm  <language> <data_model_dir>` --- for the given language and directory for data and word2vec models, the script aligns models from earlier periods to the model from the last period.
+`src/align_word2vec.slurm  <language> <data_model_dir>` --- for the given language and the directory for data & word2vec models, the script aligns models from earlier periods to the model from the last period.
 
 ### Contextualized embeddings
-`src/get_many_embeddings.sh` --- obtains T5 embeddings for multiple languages across three time period
+`src/get_many_embeddings.sh` --- obtains T5 embeddings for multiple languages across three time periods
 
-`src/get_xlrm_embeddings.sh` --- obtains XLMR embeddings for multiple languages across three time period
+`src/get_xlrm_embeddings.sh` --- obtains XLMR embeddings for multiple languages across three time periods
 
 **Postprocessing helpers**
+
 `src/merge_by_size.sh <data_dir> <language> <period>` --- merges embedding files into groups of approximately equal size. See called in `src/merge_lemmas.sh`.
+
 `src/torch_merge.py` --- merges embedding files into groups based on the first character of their lemma. The resulting output file is formatted as `<first lemma character>.pt.gz`. See called in `src/merge_single_language.sh`.
 
 ### Masked-token substitutes 
-`src/get_many_substitutes.sh` --- obtains XLRM substitutes for multiple languages across three time period
+`src/get_many_substitutes.sh` --- obtains XLRM substitutes for multiple languages across three time periods
