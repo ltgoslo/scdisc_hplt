@@ -7,7 +7,7 @@ The DHPLT dataset is published [here](https://data.hplt-project.org/three/diachr
 
 ## Usage Info
 ### Exploring HPLTv3 documents & stats
-`src/extract.slurm <langauge> <info_field>` --- extracts information about the given language and the document field of interest. As part of the script, `scr/dia_distribution.py` is invoked to visualize the information. `src/extract_large.slurm` can be used for larger languages.
+`src/extract.slurm <language> <info_field>` --- extracts information about the given language and the document field of interest. As part of the script, `src/dia_distribution.py` is invoked to visualize the information. `src/extract_large.slurm` can be used for larger languages.
 
 We look at the distribution of documents by the web crawl (`languages/<language>/crawl_id_sorted.png`) and plot it (`languages/<language>/crawl_id.png`). 
 
@@ -44,4 +44,4 @@ We look at the distribution of documents by the web crawl (`languages/<language>
 `src/torch_merge.py` --- merges embedding files into groups based on the first character of their lemma. The resulting output file is formatted as `<first lemma character>.pt.gz`. See called in `src/merge_single_language.sh`.
 
 ### Masked-token substitutes 
-`src/get_many_substitutes.sh` --- obtains XLRM substitutes for multiple languages across three time periods
+`src/get_many_substitutes.sh` --- obtains XLMR substitutes for multiple languages across three time periods
