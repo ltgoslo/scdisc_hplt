@@ -1,6 +1,6 @@
 # Diachronic HPLT datasets for semantic change discovery
 
-This repository accompanies the paper `DHPLT: large-scale multilingual diachronic corpora and word representations for semantic change modelling` 
+This repository accompanies the paper "[DHPLT: large-scale multilingual diachronic corpora and word representations for semantic change modelling](https://arxiv.org/abs/2602.11968)"
 accepted to the [LChange'26 workshop](https://www.changeiskey.org/event/2026-eacl-lchange/).
 
 The DHPLT dataset itself can be downloaded from [here](https://data.hplt-project.org/three/diachronic/).
