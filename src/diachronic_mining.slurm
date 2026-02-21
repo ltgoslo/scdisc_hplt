@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH --job-name=lchange
 #SBATCH --account=nn10029k
-#SBATCH --time=12:00:00
+#SBATCH --time=2:00:00
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=8
-#SBATCH --mem-per-cpu=1G
+#SBATCH --cpus-per-task=16
+#SBATCH --mem-per-cpu=2G
 
 # Extracts documents crawled in a specific time period
 # Saves them in a single jsonl.zst file
@@ -49,23 +49,23 @@ echo "Sampling..."
 
 # This is for really large languages like English, Russian or Chinese:
 
-for el in /cluster/work/projects/nn9851k/tmp/${LANG}/${PERIOD0}_${PERIOD1}_*.jsonl.zst
-do
-    (
-    zstdcat ${el} | shuf -n 10000 | zstd > /cluster/work/projects/nn9851k/tmp/${LANG}/sampled_${PERIOD0}_${PERIOD1}_$(basename ${el})
-    sleep $(( (RANDOM % 3) + 1))
-    ) &
-    if [[ $(jobs -r -p | wc -l) -ge $N ]]; then
-        wait -n
-    fi
-done
-wait
+#for el in /cluster/work/projects/nn9851k/tmp/${LANG}/${PERIOD0}_${PERIOD1}_*.jsonl.zst
+#do
+#    (
+#    zstdcat ${el} | shuf -n 10000 | zstd > /cluster/work/projects/nn9851k/tmp/${LANG}/sampled_${PERIOD0}_${PERIOD1}_$(basename ${el})
+#    sleep $(( (RANDOM % 3) + 1))
+#    ) &
+#    if [[ $(jobs -r -p | wc -l) -ge $N ]]; then
+#        wait -n
+#    fi
+#done
+#wait
 
-zstdcat /cluster/work/projects/nn9851k/tmp/${LANG}/sampled_${PERIOD0}_${PERIOD1}_*.zst | shuf -n ${DOCS} | zstd > diachronic/${LANG}/${PERIOD0}_${PERIOD1}.jsonl.zst
+#zstdcat /cluster/work/projects/nn9851k/tmp/${LANG}/sampled_${PERIOD0}_${PERIOD1}_*.zst | shuf -n ${DOCS} | zstd > diachronic/${LANG}/${PERIOD0}_${PERIOD1}.jsonl.zst
 
 # This is for lesser languages:
 
-# zstdcat /cluster/work/projects/nn9851k/tmp/${LANG}/${PERIOD0}_${PERIOD1}_*.zst | shuf -n ${DOCS} | zstd > diachronic/${LANG}/${PERIOD0}_${PERIOD1}.jsonl.zst
+zstdcat /cluster/work/projects/nn9851k/tmp/${LANG}/${PERIOD0}_${PERIOD1}_*.zst | shuf -n ${DOCS} | zstd > diachronic/${LANG}/${PERIOD0}_${PERIOD1}.jsonl.zst
 
 rm /cluster/work/projects/nn9851k/tmp/${LANG}/${PERIOD0}_${PERIOD1}_*.zst
 
