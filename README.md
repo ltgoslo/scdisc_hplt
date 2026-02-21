@@ -1,8 +1,9 @@
 # Diachronic HPLT datasets for semantic change discovery
 
-This repository accompanies the paper `DHPLT: large-scale multilingual diachronic corpora and word representations for semantic change modelling` from LChange'26 workshop.
+This repository accompanies the paper `DHPLT: large-scale multilingual diachronic corpora and word representations for semantic change modelling` 
+accepted to the [LChange'26 workshop](https://www.changeiskey.org/event/2026-eacl-lchange/).
 
-The DHPLT dataset is published [here](https://data.hplt-project.org/three/diachronic/).
+The DHPLT dataset itself can be downloaded from [here](https://data.hplt-project.org/three/diachronic/).
 
 
 ## Usage Info
@@ -45,3 +46,16 @@ We look at the distribution of documents by the web crawl (`languages/<language>
 
 ### Masked-token substitutes 
 `src/get_many_substitutes.sh` --- obtains XLMR substitutes for multiple languages across three time periods
+
+## Citation
+```bibtex
+@misc{fedorova2026dhpltlargescalemultilingualdiachronic,
+      title={DHPLT: large-scale multilingual diachronic corpora and word representations for semantic change modelling}, 
+      author={Mariia Fedorova and Andrey Kutuzov and Khonzoda Umarova},
+      year={2026},
+      eprint={2602.11968},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2602.11968}, 
+}
+```
